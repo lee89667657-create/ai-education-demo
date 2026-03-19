@@ -1547,7 +1547,7 @@ async function runFace(num, el) {
             ctx.fillStyle='rgba(13,158,138,0.5)'; ctx.fill();
           }
 
-          // 표정 분석 (blendshapes) — 낮춘 임계값
+          // 표정 분석 (blendshapes)
           let exprType='neutral',label='무표정',col='#94a3b8';
           if(result.faceBlendshapes&&result.faceBlendshapes[0]){
             const bs={};
@@ -1555,14 +1555,23 @@ async function runFace(num, el) {
             const jaw=bs['jawOpen']||0;
             const smL=bs['mouthSmileLeft']||0, smR=bs['mouthSmileRight']||0;
             const blinkL=bs['eyeBlinkLeft']||0, blinkR=bs['eyeBlinkRight']||0;
-            const browD=bs['browDownLeft']||0;
+            const browDL=bs['browDownLeft']||0, browDR=bs['browDownRight']||0;
+            const cheekSqL=bs['cheekSquintLeft']||0;
+            const noseSnL=bs['noseSneerLeft']||0;
             const smile=(smL+smR)/2;
             const blink=(blinkL+blinkR)/2;
+            // 화남 복합 조건 (웃지 않을 때만)
+            const isAngry = smile<0.15 && (
+              (browDL>0.15 && browDR>0.15) ||
+              cheekSqL>0.3 ||
+              noseSnL>0.2
+            );
+            // 우선순위: 눈감음 → 놀람 → 크게웃음 → 웃음 → 화남 → 무표정
             if(blink>0.45){exprType='blink';label='눈 감음';col='#94a3b8';}
-            else if(jaw>0.55){exprType='surprise';label='놀람!';col='#fbbf24';}
-            else if(smile>0.4&&jaw>0.15){exprType='bigsmile';label='크게 웃는 중!';col='#4ade80';}
-            else if(smile>0.2){exprType='smile';label='웃고 있어요';col='#4ade80';}
-            else if(browD>0.25){exprType='angry';label='화난 표정';col='#f87171';}
+            else if(jaw>0.5){exprType='surprise';label='놀람!';col='#fbbf24';}
+            else if(smile>0.45&&jaw>0.15){exprType='bigsmile';label='크게 웃는 중!';col='#4ade80';}
+            else if(smile>0.25){exprType='smile';label='웃고 있어요';col='#4ade80';}
+            else if(isAngry){exprType='angry';label='화난 표정';col='#f87171';}
           }
 
           // 페이드 전환 트리거
