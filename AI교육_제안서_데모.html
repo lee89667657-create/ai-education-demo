@@ -1070,35 +1070,47 @@ async function runHands(num, el) {
 
   const landmarker = loadedModels['hands'];
   el.info.textContent = '✋ 손을 카메라에 보여주세요!';
-  if (el.result) { el.result.style.display='flex'; el.result.innerHTML='검지로 물건을 잡아 움직여보세요!'; }
+  if (el.result) { el.result.style.display='flex'; el.result.innerHTML='🧺 검지로 물건을 잡아 바구니에 넣으세요! 30초 도전!'; }
   activeLoops[num] = true;
   const W=1280, H=720;
   el.canvas.width=W; el.canvas.height=H;
   const ctx = el.canvas.getContext('2d');
   let lastTime=-1;
 
-  // ── 떠다니는 물건들 ──
+  // ── 바구니 ──
+  const basket = { x: W-110, y: H/2, w: 160, h: 160 };
+
+  // ── 떠다니는 물건들 (크게!) ──
   const EMOJIS = ['🌟','⚽','🎈','❤️','🎵'];
-  const items = EMOJIS.map((em, i) => ({
-    emoji: em,
-    x: 200 + i * 200 + Math.random()*100,
-    y: 150 + Math.random()*(H-300),
-    vx: (Math.random()-0.5)*1.5,
-    vy: (Math.random()-0.5)*1.5,
-    size: 56,
-    grabbed: false,       // 현재 잡힌 상태
-    grabbedBy: -1,        // 잡은 손 인덱스
-    flingVx: 0,
-    flingVy: 0,
-    bobPhase: Math.random()*Math.PI*2,  // 둥둥 떠다니는 위상
-  }));
+  const ITEM_SIZE = 80;
+  function spawnItem(em, idx) {
+    return {
+      emoji: em, idx: idx,
+      x: 100 + Math.random()*(W*0.55),
+      y: 120 + Math.random()*(H-280),
+      vx: (Math.random()-0.5)*1.8,
+      vy: (Math.random()-0.5)*1.8,
+      size: ITEM_SIZE,
+      grabbed: false, grabbedBy: -1,
+      flingVx: 0, flingVy: 0,
+      bobPhase: Math.random()*Math.PI*2,
+      alive: true,
+    };
+  }
+  let items = EMOJIS.map((em,i) => spawnItem(em,i));
 
-  const GRAB_DIST = 60;       // 잡기 판정 거리
-  const FLING_FRICTION = 0.97; // 튕겨나간 뒤 감속
+  const GRAB_DIST = 70;
+  const FLING_FRICTION = 0.97;
 
-  // 손 열림 감지 (검지~소지 끝이 MCP보다 충분히 멀면 열린 손)
+  // ── 게임 상태 ──
+  let score = 0;
+  const GAME_TIME = 30;
+  let gameStartTime = performance.now();
+  let gameOver = false;
+  let scoreEffects = []; // +1 이펙트 애니메이션
+
+  // 손 열림 감지
   function isHandOpen(mkp) {
-    // 각 손가락 끝(8,12,16,20)이 PIP(6,10,14,18)보다 손목(0)에서 더 먼지 확인
     let openCount = 0;
     const pairs = [[8,6],[12,10],[16,14],[20,18]];
     const w = mkp[0];
@@ -1110,161 +1122,224 @@ async function runHands(num, el) {
     return openCount >= 3;
   }
 
-  // 이전 프레임 검지 위치 (손별)
-  const prevTip = {};
-  let grabCount = 0;
+  // 검지 속도 추적 (관성용)
+  const prevTips = {};  // {hi: [{x,y,t}, ...]} 최근 5프레임
+  function trackTip(hi, x, y, t) {
+    if (!prevTips[hi]) prevTips[hi] = [];
+    prevTips[hi].push({x,y,t});
+    if (prevTips[hi].length > 6) prevTips[hi].shift();
+  }
+  function getTipVelocity(hi) {
+    const pts = prevTips[hi];
+    if (!pts || pts.length < 2) return {vx:0, vy:0, speed:0};
+    const a = pts[0], b = pts[pts.length-1];
+    const dt = (b.t - a.t) / 16.67; // 프레임 단위
+    if (dt < 0.5) return {vx:0, vy:0, speed:0};
+    const vx = (b.x - a.x) / dt;
+    const vy = (b.y - a.y) / dt;
+    return {vx, vy, speed: Math.hypot(vx, vy)};
+  }
 
   const loop = () => {
     if (!activeLoops[num]||!activeStreams[num]) return;
+    const now = performance.now();
+
+    // 타이머
+    const elapsed = (now - gameStartTime) / 1000;
+    const remaining = Math.max(0, GAME_TIME - elapsed);
+    if (remaining <= 0 && !gameOver) gameOver = true;
+
     // 미러 그리기
     ctx.save(); ctx.translate(W,0); ctx.scale(-1,1);
     ctx.drawImage(el.video,0,0,W,H); ctx.restore();
 
-    // ── 물건 물리 업데이트 ──
-    const now = performance.now();
-    items.forEach(it => {
-      if (!it.grabbed) {
-        // 튕겨나간 속도 적용
-        if (Math.abs(it.flingVx)>0.3 || Math.abs(it.flingVy)>0.3) {
+    // ── 바구니 그리기 ──
+    const bx=basket.x, by=basket.y, bw=basket.w, bh=basket.h;
+    // 글로우
+    ctx.shadowColor='rgba(74,222,128,0.4)'; ctx.shadowBlur=30;
+    ctx.fillStyle='rgba(74,222,128,0.12)';
+    ctx.fillRect(bx-bw/2, by-bh/2, bw, bh);
+    ctx.shadowBlur=0;
+    // 테두리
+    ctx.strokeStyle='#4ade80'; ctx.lineWidth=4;
+    ctx.setLineDash([10,6]); ctx.strokeRect(bx-bw/2, by-bh/2, bw, bh); ctx.setLineDash([]);
+    // 바구니 이모지
+    ctx.font='72px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('🧺', bx, by);
+    // 라벨
+    ctx.font='bold 16px sans-serif'; ctx.fillStyle='rgba(74,222,128,0.8)';
+    ctx.fillText('여기에 넣기!', bx, by+bh/2+22);
+
+    if (!gameOver) {
+      // ── 물건 물리 업데이트 ──
+      items.forEach(it => {
+        if (!it.alive || it.grabbed) return;
+        if (Math.abs(it.flingVx)>0.5 || Math.abs(it.flingVy)>0.5) {
           it.x += it.flingVx;
           it.y += it.flingVy;
           it.flingVx *= FLING_FRICTION;
           it.flingVy *= FLING_FRICTION;
         } else {
-          // 둥둥 떠다니기
           it.bobPhase += 0.02;
-          it.x += it.vx + Math.sin(it.bobPhase)*0.4;
-          it.y += it.vy + Math.cos(it.bobPhase*0.7)*0.3;
+          it.x += it.vx + Math.sin(it.bobPhase)*0.5;
+          it.y += it.vy + Math.cos(it.bobPhase*0.7)*0.4;
+          it.flingVx = 0; it.flingVy = 0;
         }
-        // 벽 바운스
-        if (it.x < it.size) { it.x = it.size; it.vx = Math.abs(it.vx); it.flingVx = Math.abs(it.flingVx)*0.6; }
-        if (it.x > W-it.size) { it.x = W-it.size; it.vx = -Math.abs(it.vx); it.flingVx = -Math.abs(it.flingVx)*0.6; }
-        if (it.y < it.size) { it.y = it.size; it.vy = Math.abs(it.vy); it.flingVy = Math.abs(it.flingVy)*0.6; }
-        if (it.y > H-it.size) { it.y = H-it.size; it.vy = -Math.abs(it.vy); it.flingVy = -Math.abs(it.flingVy)*0.6; }
-      }
-    });
+        // 벽 바운스 (바구니 영역 제외)
+        const pad = it.size*0.5;
+        if (it.x < pad) { it.x=pad; it.vx=Math.abs(it.vx); it.flingVx=Math.abs(it.flingVx)*0.7; }
+        if (it.x > W-pad) { it.x=W-pad; it.vx=-Math.abs(it.vx); it.flingVx=-Math.abs(it.flingVx)*0.7; }
+        if (it.y < pad) { it.y=pad; it.vy=Math.abs(it.vy); it.flingVy=Math.abs(it.flingVy)*0.7; }
+        if (it.y > H-pad) { it.y=H-pad; it.vy=-Math.abs(it.vy); it.flingVy=-Math.abs(it.flingVy)*0.7; }
 
-    // ── 손 인식 + 물건 인터랙션 ──
-    if (now!==lastTime) {
-      lastTime=now;
-      try {
-        const result=landmarker.detectForVideo(el.video,now);
-        // 잡기 해제: 손이 사라지면
-        const activeHands = new Set();
-        if (result&&result.landmarks) {
-          result.landmarks.forEach((lm,hi)=>{
-            activeHands.add(hi);
-            const mkp=lm.map(p=>({x:(1-p.x)*W, y:p.y*H}));
-            const tip8 = mkp[8]; // 검지 끝
+        // 바구니 충돌 판정 (잡혀있지 않고, 날아가는 중이거나 떠다니다 들어온 경우)
+        if (it.x > bx-bw/2 && it.x < bx+bw/2 && it.y > by-bh/2 && it.y < by+bh/2) {
+          it.alive = false;
+          score++;
+          scoreEffects.push({x:bx, y:by-bh/2-10, t:now, text:'+1'});
+          // 리스폰: 1초 후 새 아이콘
+          setTimeout(()=>{
+            const idx = items.indexOf(it);
+            if (idx>=0 && !gameOver) items[idx] = spawnItem(EMOJIS[Math.floor(Math.random()*EMOJIS.length)], idx);
+          }, 1000);
+        }
+      });
 
-            // 손 열림 감지
-            const open = isHandOpen(mkp);
+      // ── 손 인식 + 인터랙션 ──
+      if (now!==lastTime) {
+        lastTime=now;
+        try {
+          const result=landmarker.detectForVideo(el.video,now);
+          const activeHands = new Set();
+          if (result&&result.landmarks) {
+            result.landmarks.forEach((lm,hi)=>{
+              activeHands.add(hi);
+              const mkp=lm.map(p=>({x:(1-p.x)*W, y:p.y*H}));
+              const tip8 = mkp[8];
+              const open = isHandOpen(mkp);
 
-            // 이전 프레임 검지 속도
-            const prev = prevTip[hi] || {x:tip8.x, y:tip8.y};
-            const tipVx = tip8.x - prev.x;
-            const tipVy = tip8.y - prev.y;
-            const tipSpeed = Math.hypot(tipVx, tipVy);
-            prevTip[hi] = {x:tip8.x, y:tip8.y};
+              trackTip(hi, tip8.x, tip8.y, now);
+              const vel = getTipVelocity(hi);
 
-            // 잡고 있는 물건 처리
-            items.forEach(it => {
-              if (it.grabbed && it.grabbedBy === hi) {
-                // 손을 빠르게 펴면 튕겨나가기
-                if (open && tipSpeed > 8) {
-                  it.grabbed = false;
-                  it.grabbedBy = -1;
-                  it.flingVx = tipVx * 2.5;
-                  it.flingVy = tipVy * 2.5;
-                  grabCount++;
-                } else {
-                  // 잡힌 채로 따라가기
-                  it.x = tip8.x;
-                  it.y = tip8.y;
-                  it.flingVx = 0;
-                  it.flingVy = 0;
-                }
-              }
-            });
-
-            // 잡기 시도 (검지가 물건 근처)
-            if (!open) {
+              // 잡고 있는 물건 — 손 펴면 관성으로 날리기
               items.forEach(it => {
-                if (it.grabbed) return;
-                const d = Math.hypot(it.x - tip8.x, it.y - tip8.y);
-                if (d < GRAB_DIST) {
-                  it.grabbed = true;
-                  it.grabbedBy = hi;
-                  it.flingVx = 0;
-                  it.flingVy = 0;
+                if (!it.alive || !it.grabbed || it.grabbedBy !== hi) return;
+                if (open && vel.speed > 5) {
+                  it.grabbed = false; it.grabbedBy = -1;
+                  it.flingVx = vel.vx * 3;
+                  it.flingVy = vel.vy * 3;
+                } else {
+                  it.x = tip8.x; it.y = tip8.y;
+                  it.flingVx = 0; it.flingVy = 0;
                 }
               });
-            }
 
-            // ── 관절 그리기 (기존 유지) ──
-            ctx.strokeStyle='rgba(13,158,138,0.9)'; ctx.lineWidth=4;
-            HAND_CONNECTIONS.forEach(([a,b])=>{
-              ctx.beginPath(); ctx.moveTo(mkp[a].x,mkp[a].y);
-              ctx.lineTo(mkp[b].x,mkp[b].y); ctx.stroke();
+              // 잡기 시도
+              if (!open) {
+                items.forEach(it => {
+                  if (!it.alive || it.grabbed) return;
+                  if (Math.hypot(it.x-tip8.x, it.y-tip8.y) < GRAB_DIST) {
+                    it.grabbed = true; it.grabbedBy = hi;
+                    it.flingVx = 0; it.flingVy = 0;
+                  }
+                });
+              }
+
+              // ── 관절 그리기 ──
+              ctx.strokeStyle='rgba(13,158,138,0.9)'; ctx.lineWidth=4;
+              HAND_CONNECTIONS.forEach(([a,b])=>{
+                ctx.beginPath(); ctx.moveTo(mkp[a].x,mkp[a].y);
+                ctx.lineTo(mkp[b].x,mkp[b].y); ctx.stroke();
+              });
+              mkp.forEach((p,i)=>{
+                const isTip=[4,8,12,16,20].includes(i);
+                ctx.beginPath(); ctx.arc(p.x,p.y,isTip?12:7,0,Math.PI*2);
+                ctx.fillStyle=isTip?'#E8613A':'#0D9E8A'; ctx.fill();
+              });
+              // 검지 범위
+              ctx.beginPath(); ctx.arc(tip8.x,tip8.y,GRAB_DIST,0,Math.PI*2);
+              ctx.strokeStyle='rgba(232,97,58,0.2)'; ctx.lineWidth=2; ctx.stroke();
+              // 손 이름
+              const wrist=mkp[0];
+              const hLabel = wrist.x < W/2 ? '왼손' : '오른손';
+              ctx.fillStyle='rgba(0,0,0,0.8)'; ctx.fillRect(wrist.x-52,wrist.y-40,104,32);
+              ctx.fillStyle='#C8EDE6'; ctx.font='bold 20px sans-serif'; ctx.textAlign='center';
+              ctx.fillText(hLabel, wrist.x, wrist.y-18);
             });
-            mkp.forEach((p,i)=>{
-              const isTip=[4,8,12,16,20].includes(i);
-              ctx.beginPath(); ctx.arc(p.x,p.y,isTip?12:7,0,Math.PI*2);
-              ctx.fillStyle=isTip?'#E8613A':'#0D9E8A'; ctx.fill();
-            });
-
-            // 검지 끝 강조 (잡기 포인터)
-            ctx.beginPath(); ctx.arc(tip8.x,tip8.y,GRAB_DIST,0,Math.PI*2);
-            ctx.strokeStyle='rgba(232,97,58,0.25)'; ctx.lineWidth=2; ctx.stroke();
-
-            // 손 이름
-            const wrist=mkp[0];
-            const hLabel = wrist.x < W/2 ? '왼손' : '오른손';
-            ctx.fillStyle='rgba(0,0,0,0.85)'; ctx.fillRect(wrist.x-60,wrist.y-44,120,38);
-            ctx.fillStyle='#C8EDE6'; ctx.font='bold 24px sans-serif'; ctx.textAlign='center';
-            ctx.fillText(hLabel, wrist.x, wrist.y-16);
+          }
+          // 손 사라지면 잡기 해제
+          items.forEach(it => {
+            if (it.grabbed && !activeHands.has(it.grabbedBy)) { it.grabbed=false; it.grabbedBy=-1; }
           });
-        }
-        // 손 사라지면 잡기 해제
-        items.forEach(it => {
-          if (it.grabbed && !activeHands.has(it.grabbedBy)) {
-            it.grabbed = false; it.grabbedBy = -1;
-          }
-        });
-
-        const cnt = result?.landmarks?.length || 0;
-        const grabbedCnt = items.filter(it=>it.grabbed).length;
-        el.info.textContent = cnt>0 ? `✋ 손 ${cnt}개 감지` : '✋ 손을 카메라에 보여주세요';
-        if (el.result) {
-          if (cnt === 0) {
-            el.result.innerHTML='손을 카메라에 보여주세요 — 검지로 물건을 잡아보세요!';
-          } else if (grabbedCnt > 0) {
-            el.result.innerHTML=`🤏 <b>${grabbedCnt}개</b> 잡는 중! — 손을 빠르게 펴서 던져보세요`;
-          } else {
-            el.result.innerHTML=`👋 손 ${cnt}개 감지 — 검지 끝을 물건에 가까이 대보세요`;
-          }
-        }
-      } catch(e){}
-    }
-
-    // ── 물건 그리기 (항상 최상위) ──
-    items.forEach(it => {
-      ctx.font = `${it.grabbed ? it.size+12 : it.size}px serif`;
-      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      // 잡힌 물건 글로우
-      if (it.grabbed) {
-        ctx.shadowColor = '#E8613A';
-        ctx.shadowBlur = 24;
+        } catch(e){}
       }
+    } // end !gameOver
+
+    // ── 물건 그리기 ──
+    items.forEach(it => {
+      if (!it.alive) return;
+      const sz = it.grabbed ? it.size+16 : it.size;
+      ctx.font = `${sz}px serif`;
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      if (it.grabbed) { ctx.shadowColor='#E8613A'; ctx.shadowBlur=28; }
       ctx.fillText(it.emoji, it.x, it.y);
-      ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
-      // 튕겨나갈 때 잔상
-      if (!it.grabbed && (Math.abs(it.flingVx)>3 || Math.abs(it.flingVy)>3)) {
-        ctx.globalAlpha = 0.3;
-        ctx.fillText(it.emoji, it.x - it.flingVx*2, it.y - it.flingVy*2);
-        ctx.globalAlpha = 1;
+      ctx.shadowColor='transparent'; ctx.shadowBlur=0;
+      // 잔상
+      if (!it.grabbed && (Math.abs(it.flingVx)>4||Math.abs(it.flingVy)>4)) {
+        ctx.globalAlpha=0.25;
+        ctx.fillText(it.emoji, it.x-it.flingVx*2, it.y-it.flingVy*2);
+        ctx.globalAlpha=1;
       }
     });
+
+    // ── +1 이펙트 ──
+    scoreEffects = scoreEffects.filter(e => now-e.t < 1200);
+    scoreEffects.forEach(e => {
+      const age = (now-e.t)/1200;
+      ctx.globalAlpha = 1-age;
+      ctx.font='bold 48px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillStyle='#4ade80';
+      ctx.fillText(e.text, e.x, e.y - age*60);
+      ctx.globalAlpha=1;
+    });
+
+    // ── 상단 HUD: 점수 + 타이머 ──
+    ctx.fillStyle='rgba(0,0,0,0.8)'; ctx.fillRect(0,0,W,64);
+    // 점수 (왼쪽)
+    ctx.font='bold 32px sans-serif'; ctx.textAlign='left'; ctx.textBaseline='middle';
+    ctx.fillStyle='#4ade80';
+    ctx.fillText(`🧺 ${score}점`, 24, 32);
+    // 타이머 (오른쪽)
+    const sec = Math.ceil(remaining);
+    ctx.textAlign='right';
+    ctx.fillStyle = sec <= 5 ? '#f87171' : '#fbbf24';
+    ctx.fillText(`⏱ ${sec}초`, W-24, 32);
+    // 가운데 안내
+    ctx.textAlign='center'; ctx.fillStyle='rgba(255,255,255,0.6)'; ctx.font='bold 20px sans-serif';
+    ctx.fillText('검지로 잡아서 🧺 바구니에 던지세요!', W/2, 32);
+
+    // ── 게임오버 오버레이 ──
+    if (gameOver) {
+      ctx.fillStyle='rgba(0,0,0,0.75)'; ctx.fillRect(0,0,W,H);
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.font='bold 64px sans-serif'; ctx.fillStyle='#fbbf24';
+      ctx.fillText('⏰ 시간 종료!', W/2, H/2-60);
+      ctx.font='bold 80px sans-serif'; ctx.fillStyle='#4ade80';
+      ctx.fillText(`🧺 ${score}점`, W/2, H/2+40);
+      ctx.font='bold 24px sans-serif'; ctx.fillStyle='rgba(255,255,255,0.5)';
+      ctx.fillText('데모를 다시 시작하려면 [체험 중단] 후 다시 시작하세요', W/2, H/2+110);
+
+      el.info.textContent=`🏆 최종 점수: ${score}점`;
+      if(el.result) el.result.innerHTML=`🏆 <b>최종 점수: ${score}점</b> — 다시 하려면 중단 후 재시작`;
+    } else {
+      const cnt = items.filter(it=>it.alive).length;
+      const grabbedCnt = items.filter(it=>it.alive&&it.grabbed).length;
+      el.info.textContent=`🧺 ${score}점 | ⏱ ${sec}초`;
+      if(el.result) {
+        if (grabbedCnt > 0) el.result.innerHTML=`🤏 잡는 중! 바구니로 던지세요! &nbsp;|&nbsp; 🧺 <b>${score}점</b> &nbsp;|&nbsp; ⏱ ${sec}초`;
+        else el.result.innerHTML=`검지로 물건을 잡아 🧺 바구니에 넣으세요! &nbsp;|&nbsp; 🧺 <b>${score}점</b> &nbsp;|&nbsp; ⏱ ${sec}초`;
+      }
+    }
 
     if(activeLoops[num]) requestAnimationFrame(loop);
   };
