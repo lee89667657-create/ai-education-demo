@@ -1582,27 +1582,24 @@ async function runFace(num, el) {
             }
           }
 
-          // ── 오른쪽 패널에 이미지 그리기 ──
+          // ── 오른쪽 패널에 이미지 그리기 (꽉 채우기) ──
           const panelX = HW, panelW = HW, panelH = H;
-          const labelH = 70; // 하단 라벨 영역
-          const imgAreaH = panelH - labelH;
 
-          // 현재 이미지 그리기 (페이드 아웃)
           const drawFaceImg = (key, alpha) => {
             const img = FACE_IMAGES[key];
             if (!img || !img.complete || !img.naturalWidth) return;
             ctx.globalAlpha = alpha;
-            // 이미지를 패널에 최대한 크게 (비율 유지)
+            // contain: 패널 전체 높이 사용, 비율 유지
             const imgRatio = img.naturalWidth / img.naturalHeight;
-            const areaRatio = panelW / imgAreaH;
+            const areaRatio = panelW / panelH;
             let dw, dh;
             if (imgRatio > areaRatio) {
               dw = panelW; dh = panelW / imgRatio;
             } else {
-              dh = imgAreaH; dw = imgAreaH * imgRatio;
+              dh = panelH; dw = panelH * imgRatio;
             }
             const dx = panelX + (panelW - dw) / 2;
-            const dy = (imgAreaH - dh) / 2;
+            const dy = (panelH - dh) / 2;
             ctx.drawImage(img, dx, dy, dw, dh);
             ctx.globalAlpha = 1;
           };
@@ -1615,43 +1612,48 @@ async function runFace(num, el) {
             drawFaceImg(currentExpr, 1);
           }
 
-          // 하단 라벨 배경
-          const lblY = imgAreaH;
-          ctx.fillStyle = '#f8f8f8';
-          ctx.fillRect(panelX, lblY, panelW, labelH);
-          // 색깔 악센트 바
-          ctx.fillStyle = col;
-          ctx.fillRect(panelX, lblY, panelW, 4);
-          // 표정 이름
+          // 하단 오버레이 라벨 (이미지 위에)
           const emojiMap = {neutral:'😐',smile:'😊',bigsmile:'😄',surprise:'😲',angry:'😠',blink:'😴'};
           const emoji = emojiMap[fadeTarget||currentExpr] || '😐';
-          ctx.font = 'bold 32px sans-serif';
-          ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+          const lblH = 64;
+          // 반투명 배경
+          const lblGrad = ctx.createLinearGradient(0, H-lblH-20, 0, H);
+          lblGrad.addColorStop(0, 'rgba(0,0,0,0)');
+          lblGrad.addColorStop(0.3, 'rgba(0,0,0,0.6)');
+          lblGrad.addColorStop(1, 'rgba(0,0,0,0.8)');
+          ctx.fillStyle = lblGrad;
+          ctx.fillRect(panelX, H-lblH-20, panelW, lblH+20);
+          // 색깔 악센트 바
           ctx.fillStyle = col;
-          ctx.fillText(`${emoji}  ${label}`, panelX + panelW/2, lblY + labelH/2);
+          ctx.fillRect(panelX, H-lblH-20, panelW, 3);
+          // 텍스트
+          ctx.font = 'bold 34px sans-serif';
+          ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+          ctx.fillStyle = '#fff';
+          ctx.fillText(`${emoji}  ${label}`, panelX + panelW/2, H - lblH/2);
 
           el.info.textContent=`${emoji} 표정: ${label}`;
           if(el.result) el.result.innerHTML=`${emoji} <b style="color:${col}">${label}</b> — 다양한 표정을 지어보세요!`;
         } else {
-          // 얼굴 미감지 — 기본 이미지
+          // 얼굴 미감지 — 기본 이미지 (꽉 채우기, 반투명)
           const img = FACE_IMAGES['neutral'];
           if (img && img.complete && img.naturalWidth) {
-            const panelX=HW, panelW=HW, imgAreaH=H-70;
+            ctx.globalAlpha = 0.45;
             const imgRatio = img.naturalWidth / img.naturalHeight;
-            const areaRatio = panelW / imgAreaH;
+            const areaRatio = HW / H;
             let dw, dh;
-            if (imgRatio > areaRatio) { dw=panelW; dh=panelW/imgRatio; }
-            else { dh=imgAreaH; dw=imgAreaH*imgRatio; }
-            const dx = panelX + (panelW-dw)/2, dy = (imgAreaH-dh)/2;
-            ctx.globalAlpha = 0.5;
-            ctx.drawImage(img, dx, dy, dw, dh);
+            if (imgRatio > areaRatio) { dw=HW; dh=HW/imgRatio; }
+            else { dh=H; dw=H*imgRatio; }
+            ctx.drawImage(img, HW+(HW-dw)/2, (H-dh)/2, dw, dh);
             ctx.globalAlpha = 1;
           }
-          // 안내 텍스트
-          ctx.fillStyle='#f8f8f8'; ctx.fillRect(HW, H-70, HW, 70);
-          ctx.fillStyle='#999'; ctx.font='bold 24px sans-serif';
+          // 오버레이 안내
+          const g = ctx.createLinearGradient(0, H-80, 0, H);
+          g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(0.4, 'rgba(0,0,0,0.7)');
+          ctx.fillStyle=g; ctx.fillRect(HW, H-80, HW, 80);
+          ctx.fillStyle='#fff'; ctx.font='bold 26px sans-serif';
           ctx.textAlign='center'; ctx.textBaseline='middle';
-          ctx.fillText('😊  얼굴을 카메라에 보여주세요', HW+HW/2, H-35);
+          ctx.fillText('😊  얼굴을 카메라에 보여주세요', HW+HW/2, H-30);
           el.info.textContent='😊 얼굴을 카메라 정면으로 보여주세요';
           if(el.result) el.result.innerHTML='얼굴을 카메라에 보여주세요';
         }
