@@ -1,0 +1,1605 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 교육 기획서 — 방과후 AI 바르게 쓰기</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root {
+  --dark:   #0D2E3A;
+  --teal:   #0A7B6B;
+  --teal2:  #0D9E8A;
+  --mint:   #C8EDE6;
+  --coral:  #E8613A;
+  --purple: #5B4E8E;
+  --gold:   #D4A843;
+  --cream:  #F5F2EC;
+  --white:  #FFFFFF;
+  --text:   #1A2E35;
+  --muted:  #5A6E73;
+  --lgray:  #E8EDEE;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+  background: var(--dark);
+  color: var(--white);
+  overflow-x: hidden;
+}
+
+/* ── NAV ── */
+nav {
+  position: fixed; top:0; left:0; right:0; z-index:100;
+  background: rgba(13,46,58,0.95);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  padding: 0 2rem;
+  height: 56px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.nav-brand { font-size:13px; font-weight:700; color:var(--mint); letter-spacing:0.04em; }
+.nav-links { display:flex; gap:4px; }
+.nav-links a {
+  font-size:11px; color:rgba(255,255,255,0.55); text-decoration:none;
+  padding:5px 10px; border-radius:20px; transition:all .2s;
+}
+.nav-links a:hover { color:var(--white); background:rgba(255,255,255,0.08); }
+
+/* ── SECTIONS ── */
+section { min-height:100vh; padding:80px 0 60px; }
+
+.container { max-width:1600px; margin:0 auto; padding:0 2rem; }
+
+/* ── HERO ── */
+#hero {
+  display:flex; align-items:center;
+  background: var(--dark);
+  position:relative; overflow:hidden;
+  min-height:100vh;
+}
+.hero-bg {
+  position:absolute; inset:0; pointer-events:none;
+}
+.hero-circle1 {
+  position:absolute; right:-80px; top:-80px;
+  width:480px; height:480px; border-radius:50%;
+  background: radial-gradient(circle, rgba(10,123,107,0.18) 0%, transparent 70%);
+}
+.hero-circle2 {
+  position:absolute; right:80px; bottom:-60px;
+  width:280px; height:280px; border-radius:50%;
+  background: radial-gradient(circle, rgba(232,97,58,0.15) 0%, transparent 70%);
+}
+.hero-grid {
+  position:absolute; inset:0;
+  background-image: linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+.hero-content { position:relative; z-index:1; }
+.hero-badge {
+  display:inline-flex; align-items:center; gap:8px;
+  background: rgba(232,97,58,0.15); border:1px solid rgba(232,97,58,0.4);
+  border-radius:20px; padding:6px 16px; margin-bottom:2rem;
+}
+.hero-badge span { font-size:11px; font-weight:700; color:var(--coral); letter-spacing:0.06em; }
+
+.hero-title {
+  font-family: 'DM Serif Display', serif;
+  font-size:clamp(42px,5vw,72px);
+  line-height:1.1; margin-bottom:1.5rem;
+  color:var(--white);
+}
+.hero-title em { font-style:italic; color:var(--mint); }
+
+.hero-sub {
+  font-size:17px; color:rgba(255,255,255,0.6);
+  line-height:1.7; margin-bottom:2.5rem; max-width:560px;
+}
+
+.hero-pillars {
+  display:flex; gap:12px; flex-wrap:wrap; margin-bottom:3rem;
+}
+.pillar {
+  display:flex; align-items:center; gap:8px;
+  background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1);
+  border-radius:8px; padding:10px 16px;
+}
+.pillar-dot { width:8px; height:8px; border-radius:50%; }
+.pillar span { font-size:13px; font-weight:500; }
+
+.hero-cta {
+  display:inline-flex; align-items:center; gap:10px;
+  background:var(--coral); color:var(--white);
+  padding:14px 28px; border-radius:8px; font-size:14px; font-weight:700;
+  text-decoration:none; transition:all .2s; border:none; cursor:pointer;
+}
+.hero-cta:hover { background:#d4522a; transform:translateY(-2px); }
+
+.hero-tagline {
+  margin-top:4rem; padding-top:2rem;
+  border-top:1px solid rgba(255,255,255,0.08);
+  display:flex; gap:2rem; flex-wrap:wrap;
+}
+.tagline-item { font-size:12px; color:rgba(255,255,255,0.4); display:flex; align-items:center; gap:6px; }
+.tagline-item::before { content:''; display:block; width:4px; height:4px; border-radius:50%; background:var(--teal2); }
+
+/* ── DIFF SECTION ── */
+#diff { background:var(--cream); color:var(--text); padding:80px 0; min-height:auto; }
+.section-label {
+  font-size:11px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase;
+  color:var(--coral); margin-bottom:12px;
+}
+.section-title {
+  font-family:'DM Serif Display', serif;
+  font-size:clamp(28px,3.5vw,44px); line-height:1.15; margin-bottom:1rem; color:var(--dark);
+}
+.section-sub { font-size:15px; color:var(--muted); line-height:1.7; margin-bottom:3rem; }
+
+.diff-table { width:100%; border-collapse:separate; border-spacing:0; border-radius:16px; overflow:hidden; box-shadow:0 4px 40px rgba(0,0,0,0.1); }
+.diff-table th {
+  padding:14px 20px; font-size:13px; font-weight:700;
+  text-align:center; background:var(--dark); color:var(--white);
+}
+.diff-table th.ours { background:var(--coral); }
+.diff-table td {
+  padding:14px 20px; font-size:13px; text-align:center;
+  border-bottom:1px solid var(--lgray);
+  background:var(--white);
+}
+.diff-table td.label { text-align:left; font-weight:500; background:var(--cream); color:var(--muted); }
+.diff-table td.ours { background:rgba(232,97,58,0.06); font-weight:700; color:var(--coral); }
+.diff-table tr:last-child td { border-bottom:none; }
+
+/* ── SESSION SECTION ── */
+#sessions { background:var(--dark); padding:80px 0; min-height:auto; }
+.sessions-title { font-family:'DM Serif Display', serif; font-size:clamp(28px,3.5vw,44px); color:var(--white); margin-bottom:8px; }
+.sessions-sub { font-size:15px; color:rgba(255,255,255,0.5); margin-bottom:3rem; }
+
+.session-tabs {
+  display:flex; gap:8px; flex-wrap:wrap; margin-bottom:2rem;
+}
+.tab-btn {
+  padding:8px 18px; border-radius:20px; border:1px solid rgba(255,255,255,0.15);
+  background:transparent; color:rgba(255,255,255,0.5); font-size:12px; font-weight:500;
+  cursor:pointer; transition:all .2s; font-family:'Noto Sans KR', sans-serif;
+}
+.tab-btn.active { border-color:var(--coral); background:var(--coral); color:var(--white); }
+.tab-btn:hover:not(.active) { border-color:rgba(255,255,255,0.35); color:var(--white); }
+
+.session-card {
+  display:none; background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.08); border-radius:20px; overflow:hidden;
+}
+.session-card.active { display:block; }
+
+.session-header {
+  padding:28px 32px 20px;
+  border-bottom:1px solid rgba(255,255,255,0.08);
+  display:flex; align-items:flex-start; justify-content:space-between; gap:2rem;
+}
+.session-num {
+  width:48px; height:48px; border-radius:12px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:20px; font-weight:900; color:var(--white); flex-shrink:0;
+}
+.session-info { flex:1; }
+.session-phase {
+  font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase;
+  margin-bottom:6px;
+}
+.session-name { font-size:22px; font-weight:700; color:var(--white); margin-bottom:8px; }
+.session-tool {
+  display:inline-flex; align-items:center; gap:6px;
+  background:rgba(255,255,255,0.08); border-radius:20px;
+  padding:4px 12px; font-size:11px; color:rgba(255,255,255,0.6);
+}
+.session-goal {
+  background:rgba(255,255,255,0.05); border-radius:10px;
+  padding:12px 18px; font-size:13px; color:rgba(255,255,255,0.7);
+  line-height:1.6; flex-shrink:0; max-width:380px;
+}
+
+.session-body { display:grid; grid-template-columns:1fr 2fr; gap:0; }
+.session-flow { padding:20px 24px; }
+.flow-title { font-size:11px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:rgba(255,255,255,0.3); margin-bottom:12px; }
+.flow-row { display:grid; grid-template-columns:72px 64px 1fr; gap:0; margin-bottom:3px; }
+.flow-row:last-child { margin-bottom:0; }
+.flow-cell { padding:10px 12px; font-size:11.5px; border:1px solid rgba(255,255,255,0.06); border-right:none; background:rgba(255,255,255,0.02); }
+.flow-cell:last-child { border-right:1px solid rgba(255,255,255,0.06); border-radius:0 8px 8px 0; }
+.flow-cell:first-child { border-radius:8px 0 0 8px; color:rgba(255,255,255,0.35); }
+.flow-who { font-weight:700; text-align:center; display:flex; align-items:center; justify-content:center; }
+.flow-who.teacher { color:var(--teal2); }
+.flow-who.student { color:var(--coral); }
+.flow-act { color:rgba(255,255,255,0.75); line-height:1.5; }
+
+.session-demo-panel {
+  border-left:1px solid rgba(255,255,255,0.08);
+  padding:16px; display:flex; flex-direction:column; gap:10px;
+  overflow-y:auto;
+}
+.session-demo-panel::-webkit-scrollbar { width:4px; }
+.session-demo-panel::-webkit-scrollbar-track { background:transparent; }
+.session-demo-panel::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.15); border-radius:2px; }
+.demo-box {
+  background:rgba(0,0,0,0.4); border-radius:10px;
+  overflow:hidden; position:relative;
+  width:100%; min-height:480px; aspect-ratio:16/9;
+  display:flex; align-items:center; justify-content:center;
+  flex-direction:column; gap:12px;
+}
+.demo-result-bar {
+  background:rgba(255,255,255,0.08); border-radius:10px;
+  padding:16px 24px; font-size:22px; font-weight:700;
+  color:var(--white); text-align:center; min-height:64px;
+  display:flex; align-items:center; justify-content:center;
+  flex-wrap:wrap; gap:10px; line-height:1.5;
+}
+.demo-placeholder {
+  text-align:center; padding:20px;
+}
+.demo-placeholder .demo-icon {
+  font-size:40px; margin-bottom:12px; display:block;
+}
+.demo-placeholder p { font-size:13px; color:rgba(255,255,255,0.5); line-height:1.5; }
+video.demo-video {
+  width:100%; height:100%; object-fit:cover; position:absolute; inset:0;
+  border-radius:12px; display:none;
+}
+canvas.demo-canvas {
+  width:100%; height:100%; object-fit:cover; position:absolute; inset:0;
+  border-radius:12px; display:none;
+}
+.demo-status {
+  position:absolute; top:10px; left:10px;
+  background:rgba(0,0,0,0.7); border-radius:20px;
+  padding:4px 10px; font-size:10px; font-weight:700;
+  display:none;
+}
+.demo-status.live { display:flex; align-items:center; gap:5px; color:#4ade80; }
+.demo-status.live::before {
+  content:''; width:6px; height:6px; background:#4ade80;
+  border-radius:50%; animation:blink 1s infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+.demo-info-label {
+  position:absolute; bottom:10px; left:10px; right:10px;
+  background:rgba(0,0,0,0.75); border-radius:8px;
+  padding:8px 12px; font-size:11px; color:rgba(255,255,255,0.8);
+  line-height:1.4; display:none;
+}
+
+.btn-demo {
+  width:100%; padding:13px; border-radius:10px; border:none;
+  font-family:'Noto Sans KR', sans-serif; font-size:13px; font-weight:700;
+  cursor:pointer; transition:all .2s; display:flex; align-items:center; justify-content:center; gap:8px;
+}
+.btn-demo.start { background:var(--coral); color:var(--white); }
+.btn-demo.start:hover { background:#d4522a; }
+.btn-demo.stop { background:rgba(255,255,255,0.08); color:rgba(255,255,255,0.6); display:none; }
+.btn-demo.stop:hover { background:rgba(255,255,255,0.14); }
+
+.session-footer {
+  padding:20px 32px; border-top:1px solid rgba(255,255,255,0.08);
+  display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px;
+}
+.footer-card { padding:14px 16px; background:rgba(255,255,255,0.04); border-radius:10px; }
+.footer-card-label { font-size:10px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; margin-bottom:6px; }
+.footer-card p { font-size:12px; color:rgba(255,255,255,0.65); line-height:1.5; }
+
+/* ── SPECIAL: SESSION 5 ETHICS ── */
+.ethics-card {
+  background:rgba(91,78,142,0.12); border:1px solid rgba(91,78,142,0.25);
+  border-radius:16px; padding:24px; margin:16px 32px 0;
+}
+.ethics-card h4 { font-size:15px; font-weight:700; color:var(--white); margin-bottom:12px; }
+.ethics-items { display:flex; flex-direction:column; gap:8px; }
+.ethics-item {
+  display:flex; align-items:flex-start; gap:10px;
+  background:rgba(255,255,255,0.04); border-radius:8px; padding:10px 14px;
+}
+.ethics-num {
+  width:22px; height:22px; border-radius:50%; background:var(--purple);
+  display:flex; align-items:center; justify-content:center;
+  font-size:10px; font-weight:700; color:var(--white); flex-shrink:0;
+}
+.ethics-item p { font-size:12px; color:rgba(255,255,255,0.7); line-height:1.5; }
+
+/* ── PORTFOLIO SECTION ── */
+#portfolio { background:var(--cream); color:var(--text); padding:80px 0; min-height:auto; }
+.portfolio-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; margin-bottom:2rem; }
+.portfolio-item {
+  border-radius:12px; overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,0.08);
+}
+.portfolio-item-header {
+  padding:16px; color:var(--white);
+  font-size:13px; font-weight:700; line-height:1.4;
+}
+.portfolio-item-body {
+  padding:14px 16px; background:var(--white);
+  font-size:11px; color:var(--muted); line-height:1.5;
+}
+
+.roadmap { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:2rem; }
+.roadmap-step { background:var(--white); border-radius:14px; overflow:hidden; box-shadow:0 2px 16px rgba(0,0,0,0.06); }
+.roadmap-header { padding:14px 20px; color:var(--white); }
+.roadmap-header h4 { font-size:14px; font-weight:700; }
+.roadmap-header p { font-size:11px; opacity:0.8; margin-top:2px; }
+.roadmap-body { padding:16px 20px; }
+.roadmap-item { display:flex; align-items:flex-start; gap:8px; margin-bottom:8px; font-size:12px; color:var(--muted); }
+.roadmap-dot { width:6px; height:6px; border-radius:50%; margin-top:5px; flex-shrink:0; }
+
+.insight-box {
+  background:var(--dark); border-radius:14px; padding:20px 24px;
+  margin-top:2rem; display:flex; align-items:center; gap:16px;
+}
+.insight-box p { font-size:14px; font-weight:500; color:var(--mint); line-height:1.6; }
+
+/* ── FOOTER ── */
+footer {
+  background:rgba(0,0,0,0.3); padding:32px 0; text-align:center;
+  border-top:1px solid rgba(255,255,255,0.06);
+}
+footer p { font-size:12px; color:rgba(255,255,255,0.3); }
+
+/* ── SESSION COLORS ── */
+.phase-exp   { color:var(--coral); }
+.phase-ethics { color:var(--purple); }
+.phase-plan  { color:var(--teal); }
+.phase-make  { color:var(--gold); }
+.phase-show  { color:var(--teal2); }
+
+.bg-exp   { background:var(--coral); }
+.bg-ethics { background:var(--purple); }
+.bg-plan  { background:var(--teal); }
+.bg-make  { background:var(--gold); }
+.bg-show  { background:var(--teal2); }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-brand">AI 바르게 쓰기 — 방과후 프로그램</div>
+  <div class="nav-links">
+    <a href="#hero">소개</a>
+    <a href="#diff">차별성</a>
+    <a href="#sessions">10차시</a>
+    <a href="#portfolio">결과물</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg">
+    <div class="hero-grid"></div>
+    <div class="hero-circle1"></div>
+    <div class="hero-circle2"></div>
+  </div>
+  <div class="container">
+    <div class="hero-content">
+      <div class="hero-badge"><span>방과후 AI 교육 기획서 — 최종</span></div>
+      <h1 class="hero-title">
+        AI를 몸으로 느끼고<br>
+        <em>스스로 판단하는</em><br>
+        사람을 키웁니다
+      </h1>
+      <p class="hero-sub">중학생을 위한 AI 바르게 쓰기 10차시 프로그램<br>MediaPipe · YOLO 기반 실시간 체험 + 윤리 선언 + 포트폴리오</p>
+      <div class="hero-pillars">
+        <div class="pillar"><div class="pillar-dot" style="background:var(--coral)"></div><span>체험 중심 — MediaPipe · YOLO</span></div>
+        <div class="pillar"><div class="pillar-dot" style="background:var(--purple)"></div><span>나만의 AI 윤리 선언</span></div>
+        <div class="pillar"><div class="pillar-dot" style="background:var(--teal)"></div><span>포트폴리오 한 권</span></div>
+      </div>
+      <a href="#sessions" class="hero-cta">10차시 체험하러 가기 →</a>
+      <div class="hero-tagline">
+        <div class="tagline-item">선생님은 편하게</div>
+        <div class="tagline-item">아이들은 재밌게</div>
+        <div class="tagline-item">학부모는 안심하게</div>
+        <div class="tagline-item">학교는 자신있게</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DIFF -->
+<section id="diff">
+  <div class="container">
+    <div class="section-label">왜 이 프로그램인가</div>
+    <h2 class="section-title">다른 AI 교육과 무엇이 다른가</h2>
+    <p class="section-sub">코딩도 아니고, 단순 ChatGPT 사용법도 아닙니다. 몸으로 체험하며 판단력을 키우는 유일한 프로그램입니다.</p>
+    <table class="diff-table">
+      <thead>
+        <tr>
+          <th style="width:160px;text-align:left;">구분</th>
+          <th>일반 AI 교육</th>
+          <th>코딩 교육</th>
+          <th class="ours">이 프로그램</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="label">AI 체험 방식</td><td>ChatGPT 사용법</td><td>코드로 구현</td><td class="ours">몸으로 직접 체험</td></tr>
+        <tr><td class="label">아이 역할</td><td>도구 사용자</td><td>제작자</td><td class="ours">탐험가 · 판단자</td></tr>
+        <tr><td class="label">기술 활용</td><td>텍스트 위주</td><td>프로그래밍</td><td class="ours">MediaPipe · YOLO</td></tr>
+        <tr><td class="label">윤리 교육</td><td>거의 없음</td><td>없음</td><td class="ours">나만의 윤리 선언문</td></tr>
+        <tr><td class="label">결과물</td><td>산출물 빈약</td><td>코드 프로젝트</td><td class="ours">포트폴리오 한 권</td></tr>
+        <tr><td class="label">선생님 부담</td><td>준비 많음</td><td>전문 지식 필요</td><td class="ours">QR 하나로 바로 시작</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- SESSIONS -->
+<section id="sessions">
+  <div class="container">
+    <div class="section-label" style="color:var(--mint)">10차시 커리큘럼</div>
+    <h2 class="sessions-title">1차시 = 1개 주제 = 1개 데모</h2>
+    <p class="sessions-sub">각 차시를 클릭해 수업 흐름을 확인하고, 아래 [데모 체험하기] 버튼으로 실제 AI를 직접 경험해보세요</p>
+
+    <div class="session-tabs" id="sessionTabs"></div>
+    <div id="sessionCards"></div>
+  </div>
+</section>
+
+<!-- PORTFOLIO -->
+<section id="portfolio">
+  <div class="container">
+    <div class="section-label">눈에 보이는 결과물</div>
+    <h2 class="section-title">아이 한 명마다 포트폴리오 한 권</h2>
+    <p class="section-sub">10차시가 끝나면 이 다섯 가지가 모여 포트폴리오 한 권이 됩니다. 학부모에게 바로 전달, 학교 전시도 가능.</p>
+    <div class="portfolio-grid">
+      <div class="portfolio-item">
+        <div class="portfolio-item-header" style="background:var(--coral)">체험 기록지<br><small style="font-weight:400;opacity:.8">1–4차시</small></div>
+        <div class="portfolio-item-body">핸드트래킹·표정·포즈·YOLO 체험 결과와 아이의 발견을 직접 기록</div>
+      </div>
+      <div class="portfolio-item">
+        <div class="portfolio-item-header" style="background:var(--purple)">AI 윤리 선언문<br><small style="font-weight:400;opacity:.8">5차시</small></div>
+        <div class="portfolio-item-body">아이 스스로 작성한 'AI를 쓸 때 나만의 원칙 5가지' — 학교 전시 가능</div>
+      </div>
+      <div class="portfolio-item">
+        <div class="portfolio-item-header" style="background:var(--teal)">AI 활용 아이디어<br><small style="font-weight:400;opacity:.8">6차시</small></div>
+        <div class="portfolio-item-body">체험에서 얻은 아이디어를 실제 활용법으로 제안한 기획 카드</div>
+      </div>
+      <div class="portfolio-item">
+        <div class="portfolio-item-header" style="background:var(--teal2)">프로젝트 기획안<br><small style="font-weight:400;opacity:.8">7차시</small></div>
+        <div class="portfolio-item-body">팀별 AI 활용 해결책 설계 + AI 역할 명세 + 실현 가능성 검토</div>
+      </div>
+      <div class="portfolio-item">
+        <div class="portfolio-item-header" style="background:var(--gold)">완성 결과물<br><small style="font-weight:400;opacity:.8">8–10차시</small></div>
+        <div class="portfolio-item-body">캠페인·영상·보고서 중 선택해 직접 완성한 최종 프로젝트</div>
+      </div>
+    </div>
+    <div class="roadmap">
+      <div class="roadmap-step">
+        <div class="roadmap-header" style="background:var(--teal)">
+          <h4>STEP 1 — 파일럿</h4><p>1개 학교 · 중학생</p>
+        </div>
+        <div class="roadmap-body">
+          <div class="roadmap-item"><div class="roadmap-dot" style="background:var(--teal)"></div>10차시 운영</div>
+          <div class="roadmap-item"><div class="roadmap-dot" style="background:var(--teal)"></div>결과물·후기 확보</div>
+          <div class="roadmap-item"><div class="roadmap-dot" style="background:var(--teal)"></div>포트폴리오 완성</div>
+        </div>
+      </div>
+      <div class="roadmap-step">
+        <div class="roadmap-header" style="background:var(--teal2)">
+          <h4>STEP 2 — 확산</h4><p>3–5개 학교</p>
+        </div>
+        <div class="roadmap-body">
+          <div class="roadmap-item"><div class="roadmap-dot" style="background:var(--teal2)"></div>파일럿 사례로 설득</div>
+          <div class="roadmap-item"><div class="roadmap-dot" style="background:var(--teal2)"></div>초등 고학년 추가</div>
+          <div class="roadmap-item"><div class="roadmap-dot" style="background:var(--teal2)"></div>교육청 연계 강화</div>
+        </div>
+      </div>
+      <div class="roadmap-step">
+        <div class="roadmap-header" style="background:var(--gold)">
+          <h4>STEP 3 — 플랫폼화</h4><p>학교가 찾아오는 구조</p>
+        </div>
+        <div class="roadmap-body">
+          <div class="roadmap-item"><div class="roadmap-dot" style="background:var(--gold)"></div>학년별 콘텐츠 확장</div>
+          <div class="roadmap-item"><div class="roadmap-dot" style="background:var(--gold)"></div>신기술 지속 연동</div>
+          <div class="roadmap-item"><div class="roadmap-dot" style="background:var(--gold)"></div>학교 직접 신청</div>
+        </div>
+      </div>
+    </div>
+    <div class="insight-box">
+      <span style="font-size:28px">💡</span>
+      <p>첫 학교 1곳의 포트폴리오와 학부모 후기가 다음 학교를 설득하는 가장 강력한 무기입니다</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>방과후 AI 바르게 쓰기 프로그램 기획서 · 중학생 대상 10차시 · MediaPipe · YOLO 기반 실시간 체험</p>
+</footer>
+
+<!-- MediaPipe Tasks Vision — 로컬 파일 (CJS) -->
+<script>
+// CJS 모듈을 브라우저에서 사용하기 위한 shim
+window.exports = {};
+window.module = { exports: window.exports };
+</script>
+<script src="vision_bundle.js"></script>
+<script>
+// CJS exports에서 전역으로 꺼내기
+(function() {
+  const m = window.module.exports || window.exports || {};
+  const keys = ['FilesetResolver','HandLandmarker','FaceLandmarker','PoseLandmarker','ObjectDetector'];
+  keys.forEach(k => { if (m[k]) window[k] = m[k]; });
+  // 혹시 네임스페이스 안에 있을 경우
+  if (!window.FilesetResolver && m.vision) {
+    keys.forEach(k => { if (m.vision[k]) window[k] = m.vision[k]; });
+  }
+})();
+</script>
+
+<script>
+// ── SESSION DATA ──────────────────────────────────────────────────────────────
+const SESSIONS = [
+  {
+    num:1, phase:"체험", phaseClass:"exp", tool:"핸드 트래킹 (MediaPipe)",
+    title:"AI야, 내 손 봐봐!",
+    goal:"AI가 내 손을 어떻게 읽는지 직접 느끼며 'AI란 무엇인가' 첫 경험",
+    flow:[
+      {time:"0–5분", who:"teacher", whoLabel:"선생님", act:"QR 띄우기 + '오늘 손으로 화면을 움직여볼 거예요' 한마디"},
+      {time:"5–20분", who:"student", whoLabel:"아이들", act:"핸드 트래킹 앱으로 화면 속 물체 움직이기 — 자유 탐험"},
+      {time:"20–30분", who:"student", whoLabel:"아이들", act:"'AI가 내 손을 어떻게 읽을까?' 짝과 대화 → 포스트잇에 발견 적기"},
+      {time:"30–40분", who:"teacher", whoLabel:"선생님", act:"발견 공유 + '이 기술 어디에 쓰면 좋을까?' 질문으로 마무리"},
+    ],
+    result:"체험 기록지 1장 — 내가 발견한 것·신기했던 점",
+    tip:"QR 하나만 띄우면 준비 끝. 아이들이 알아서 탐험해요.",
+    portfolio:"체험 기록지 → 포트폴리오 1번 페이지",
+    demoType:"hands",
+    demoDesc:"손을 카메라에 보여주세요 — 검지로 떠다니는 물건을 잡고, 손을 펴서 던져보세요!",
+  },
+  {
+    num:2, phase:"체험", phaseClass:"exp", tool:"표정 감지 (MediaPipe Face Mesh)",
+    title:"AI야, 내 표정 맞혀봐!",
+    goal:"AI가 감정을 어떻게 판단하는지 체험하며 'AI도 틀릴 수 있다' 첫 인식",
+    flow:[
+      {time:"0–5분", who:"teacher", whoLabel:"선생님", act:"QR 띄우기 + '오늘 표정으로 캐릭터를 조종해볼 거예요'"},
+      {time:"5–20분", who:"student", whoLabel:"아이들", act:"표정으로 캐릭터 감정 바꾸기 체험 — '화난 척', '슬픈 척' 대결"},
+      {time:"20–30분", who:"student", whoLabel:"아이들", act:"AI가 틀리게 인식한 표정 찾기 미션 → 화면 캡처 수집"},
+      {time:"30–40분", who:"teacher", whoLabel:"선생님", act:"'AI가 왜 틀렸을까?' 자유 토론으로 마무리"},
+    ],
+    result:"AI 오인식 사례 캡처 1–2개 + 짧은 이유 메모",
+    tip:"틀린 사례 찾기가 아이들이 가장 신나하는 미션이에요. 경쟁 붙이면 폭발해요.",
+    portfolio:"오인식 캡처 → 포트폴리오 2번 페이지",
+    demoType:"face",
+    demoDesc:"카메라를 보며 다양한 표정을 지어보세요 — AI가 468개 얼굴 랜드마크를 감지합니다",
+  },
+  {
+    num:3, phase:"체험", phaseClass:"exp", tool:"포즈 감지 (MediaPipe Pose)",
+    title:"AI야, 내 몸 따라와!",
+    goal:"몸 동작으로 AI와 상호작용하며 AI의 작동 원리를 몸으로 체득",
+    flow:[
+      {time:"0–5분", who:"teacher", whoLabel:"선생님", act:"QR 띄우기 + '오늘은 몸으로 퀴즈에 답해요'"},
+      {time:"5–25분", who:"student", whoLabel:"아이들", act:"포즈 감지 기반 OX 퀴즈·동작 게임 참여 — 팀 대결"},
+      {time:"25–35분", who:"student", whoLabel:"아이들", act:"'AI가 못 알아보는 동작' 찾기 → 왜 못 알아볼지 추측"},
+      {time:"35–40분", who:"teacher", whoLabel:"선생님", act:"'이 기술을 체육·재활에 쓰면 어떨까?' 아이디어 나누기"},
+    ],
+    result:"AI 동작 인식 실험 기록 + 아이디어 메모 1개",
+    tip:"팀 대결 포맷이면 교실이 체육관처럼 활기차져요. 소란스러워도 OK.",
+    portfolio:"실험 기록 → 포트폴리오 3번 페이지",
+    demoType:"pose",
+    demoDesc:"카메라 앞에서 자유롭게 움직여보세요 — AI가 33개 신체 관절을 실시간으로 추적합니다",
+  },
+  {
+    num:4, phase:"체험", phaseClass:"exp", tool:"사물 인식 (YOLO)",
+    title:"AI야, 이게 뭔지 알아?",
+    goal:"YOLO로 주변 사물을 인식해보며 AI의 가능성과 한계를 동시에 경험",
+    flow:[
+      {time:"0–5분", who:"teacher", whoLabel:"선생님", act:"QR 띄우기 + 'AI가 교실에서 뭘 찾는지 관찰해봐요'"},
+      {time:"5–20분", who:"student", whoLabel:"아이들", act:"교실 곳곳 YOLO 스캔 — 잘 인식하는 것 vs 못 인식하는 것 찾기"},
+      {time:"20–33분", who:"student", whoLabel:"아이들", act:"'AI 오인식 베스트 3' 팀별 수집 대결 — 웃긴 사례 공유"},
+      {time:"33–40분", who:"teacher", whoLabel:"선생님", act:"'YOLO를 어디에 쓰면 좋을까?' — 분리수거·보안·쇼핑 연결"},
+    ],
+    result:"AI 오인식 베스트 컬렉션 (사진 + 코멘트)",
+    tip:"웃긴 오인식 사례가 나올수록 수업이 살아나요. 많이 웃게 놔두세요.",
+    portfolio:"오인식 컬렉션 → 포트폴리오 4번 페이지",
+    demoType:"yolo",
+    demoDesc:"카메라를 주변 사물에 향해보세요 — AI가 실시간으로 사물을 인식합니다 (TensorFlow.js 기반)",
+  },
+  {
+    num:5, phase:"윤리 선언", phaseClass:"ethics", tool:"1–4차시 체험 총복습",
+    title:"AI는 왜 틀릴까? — 나만의 AI 원칙 선언",
+    goal:"체험에서 발견한 오류·편향을 바탕으로 '나만의 AI 윤리 선언문' 직접 작성",
+    flow:[
+      {time:"0–8분", who:"teacher", whoLabel:"선생님", act:"1–4차시 오인식 사례 함께 돌아보기 + '왜 이런 일이 생길까?' 질문"},
+      {time:"8–20분", who:"student", whoLabel:"아이들", act:"팀별 토론 — AI가 틀리는 이유 3가지 찾기 (편견·데이터·설계)"},
+      {time:"20–35분", who:"student", whoLabel:"아이들", act:"'나는 AI를 이렇게 쓸 거야' — 나만의 AI 원칙 5가지 직접 작성"},
+      {time:"35–40분", who:"student", whoLabel:"아이들", act:"팀별 선언문 발표 + 교실 벽에 게시"},
+    ],
+    result:"나만의 AI 윤리 선언문 (A4 1장) — 학교 전시·학부모 공개 가능",
+    tip:"선언문을 교실 벽에 붙여두면 이후 수업 내내 기준점이 돼요. 학교장·학부모에게도 인상적.",
+    portfolio:"AI 윤리 선언문 → 포트폴리오 핵심 페이지 (학교 어필 최강)",
+    demoType:"ethics",
+    demoDesc:null,
+  },
+  {
+    num:6, phase:"기획", phaseClass:"plan", tool:"자유 선택 (체험 도구 중)",
+    title:"나라면 이 AI를 어디에 쓸까?",
+    goal:"1–5차시 체험을 바탕으로 AI 활용 아이디어를 자유롭게 발상하는 창의 수업",
+    flow:[
+      {time:"0–5분", who:"teacher", whoLabel:"선생님", act:"'지금까지 체험한 4가지 AI 중 가장 재밌었던 건?' 질문"},
+      {time:"5–20분", who:"student", whoLabel:"아이들", act:"좋아하는 도구 다시 체험하며 '이걸 ○○에 쓰면 어떨까?' 아이디어 메모"},
+      {time:"20–35분", who:"student", whoLabel:"아이들", act:"아이디어 포스트잇 붙이기 → 팀별 '가장 황당하지만 재밌는 아이디어' 선발"},
+      {time:"35–40분", who:"teacher", whoLabel:"선생님", act:"아이디어 공유 + '7–9차시에 이걸 실제로 만들어볼 거예요' 예고"},
+    ],
+    result:"AI 활용 아이디어 카드 1장 (팀별)",
+    tip:"이 수업은 정답이 없어요. 황당한 아이디어일수록 더 박수 쳐주세요.",
+    portfolio:"아이디어 카드 → 포트폴리오 5번 페이지",
+    demoType:null, demoDesc:null,
+  },
+  {
+    num:7, phase:"기획", phaseClass:"plan", tool:"팀 기획",
+    title:"우리 팀의 AI 프로젝트 기획",
+    goal:"6차시 아이디어를 구체화해 팀별 AI 프로젝트 기획안 완성",
+    flow:[
+      {time:"0–5분", who:"teacher", whoLabel:"선생님", act:"팀 구성(3–4명) + 6차시 아이디어 카드 다시 펼치기"},
+      {time:"5–25분", who:"student", whoLabel:"아이들", act:"기획서 작성 — ①해결할 문제 ②AI 활용 방법 ③예상 결과물"},
+      {time:"25–37분", who:"student", whoLabel:"아이들", act:"팀별 기획 1분 발표 → 다른 팀 피드백 포스트잇"},
+      {time:"37–40분", who:"teacher", whoLabel:"선생님", act:"'8–9차시에 직접 만들어봐요' 기대감 높이기"},
+    ],
+    result:"팀 프로젝트 기획안 (A4 1장)",
+    tip:"기획안 양식을 미리 인쇄해두면 아이들이 바로 써요. 준비 5분.",
+    portfolio:"기획안 → 포트폴리오 6번 페이지",
+    demoType:null, demoDesc:null,
+  },
+  {
+    num:8, phase:"제작", phaseClass:"make", tool:"팀별 선택 AI 도구",
+    title:"만들어보자! (제작 1)",
+    goal:"기획안을 바탕으로 AI 도구를 활용해 실제 결과물 제작 시작",
+    flow:[
+      {time:"0–5분", who:"teacher", whoLabel:"선생님", act:"7차시 기획안 되돌아보기 + 오늘 목표 확인"},
+      {time:"5–30분", who:"student", whoLabel:"아이들", act:"팀별 결과물 제작 — 영상·포스터·발표자료 중 선택"},
+      {time:"30–38분", who:"student", whoLabel:"아이들", act:"중간 점검 — '지금까지 만든 것' 팀별 15초 공유"},
+      {time:"38–40분", who:"teacher", whoLabel:"선생님", act:"'9차시에 마무리하고 발표 준비할 거예요' 안내"},
+    ],
+    result:"결과물 초안 (미완성 OK)",
+    tip:"완성 못 해도 괜찮아요. '잘 되고 있네!' 한마디면 충분.",
+    portfolio:"제작 과정 사진 → 포트폴리오 7번 페이지",
+    demoType:null, demoDesc:null,
+  },
+  {
+    num:9, phase:"제작", phaseClass:"make", tool:"팀별 선택 AI 도구",
+    title:"다듬어보자! (제작 2 + 발표 준비)",
+    goal:"결과물 완성 + 10차시 발표 준비",
+    flow:[
+      {time:"0–5분", who:"teacher", whoLabel:"선생님", act:"8차시 초안 돌아보기 + '오늘 완성하고 발표 준비까지'"},
+      {time:"5–28분", who:"student", whoLabel:"아이들", act:"결과물 마무리 + 발표 순서·내용 팀별 정리"},
+      {time:"28–38분", who:"student", whoLabel:"아이들", act:"팀별 리허설 발표(2분) → 피드백 반영"},
+      {time:"38–40분", who:"teacher", whoLabel:"선생님", act:"'다음 주 발표 기대해요!' + 학부모 초대 안내"},
+    ],
+    result:"완성 결과물 + 발표 자료",
+    tip:"학부모 초대를 미리 공지하면 아이들이 훨씬 열심히 마무리해요.",
+    portfolio:"완성 결과물 → 포트폴리오 8번 페이지",
+    demoType:null, demoDesc:null,
+  },
+  {
+    num:10, phase:"발표", phaseClass:"show", tool:"전 과정 총결산",
+    title:"나의 생각 발표회",
+    goal:"10차시 체험·윤리 선언·제작 전 과정을 발표하며 포트폴리오 완성",
+    flow:[
+      {time:"0–5분", who:"teacher", whoLabel:"선생님", act:"포트폴리오 최종 정리 안내 + 발표 순서 확인"},
+      {time:"5–30분", who:"student", whoLabel:"아이들", act:"팀별 발표(3–4분) — '체험에서 발견한 것·만든 것·배운 것'"},
+      {time:"30–38분", who:"student", whoLabel:"아이들", act:"상호 피드백 — 가장 인상적인 팀·가장 창의적인 아이디어 투표"},
+      {time:"38–40분", who:"teacher", whoLabel:"선생님", act:"수료 마무리 + 포트폴리오 전달 (학부모 공유용)"},
+    ],
+    result:"포트폴리오 완성본 전달 — 학부모에게 바로 공유 가능",
+    tip:"포트폴리오를 예쁘게 묶어서 주면 학부모 반응 폭발. 학교 재계약 결정적 순간.",
+    portfolio:"포트폴리오 완성 → 학부모 전달 + 학교 홍보 자료",
+    demoType:null, demoDesc:null,
+  },
+];
+
+const PHASE_COLORS = { exp:"#E8613A", ethics:"#5B4E8E", plan:"#0A7B6B", make:"#D4A843", show:"#0D9E8A" };
+
+// ── RENDER SESSIONS ───────────────────────────────────────────────────────────
+const tabsEl = document.getElementById('sessionTabs');
+const cardsEl = document.getElementById('sessionCards');
+
+SESSIONS.forEach((sess, idx) => {
+  const color = PHASE_COLORS[sess.phaseClass];
+  const isEthics = sess.demoType === 'ethics';
+
+  // Tab
+  const tab = document.createElement('button');
+  tab.className = 'tab-btn' + (idx===0?' active':'');
+  tab.textContent = `${sess.num}차시`;
+  tab.onclick = () => {
+    document.querySelectorAll('.tab-btn').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.session-card').forEach(c=>c.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(`card-${sess.num}`).classList.add('active');
+  };
+  tabsEl.appendChild(tab);
+
+  // Card
+  const flowRows = sess.flow.map(f=>`
+    <div class="flow-row">
+      <div class="flow-cell">${f.time}</div>
+      <div class="flow-cell flow-who ${f.who}">${f.whoLabel}</div>
+      <div class="flow-cell flow-act">${f.act}</div>
+    </div>`).join('');
+
+  // Teacher guide data for sessions 6-10
+  const TEACHER_GUIDES = {
+    6: {
+      color:'#0A7B6B',
+      emoji:'💡',
+      headline:'아이디어 발상 수업',
+      teacherDo:['체험 도구 QR을 다시 한 번 띄워주세요','아이들이 자유롭게 탐험하게 놔두세요','황당한 아이디어도 크게 칭찬해주세요'],
+      question:'"지금까지 체험한 것 중에 어디에 쓰면 제일 재밌을 것 같아?"',
+      qrLabel:'아이디어 기록 템플릿',
+      qrUrl:'https://docs.google.com/forms/d/e/1FAIpQLSf_example/viewform',
+      qrNote:'아이디어 카드 Google Form — 바로 제출 가능',
+      prep:'준비물: 없음 (QR만 띄우면 끝)',
+      timeBlocks:[
+        {label:'시작 질문', mins:5, color:'#0A7B6B'},
+        {label:'자유 탐험 + 메모', mins:15, color:'#0D9E8A'},
+        {label:'팀 발표 대결', mins:15, color:'#0A7B6B'},
+        {label:'공유 + 예고', mins:5, color:'#0D9E8A'},
+      ],
+    },
+    7: {
+      color:'#0A7B6B',
+      emoji:'📋',
+      headline:'팀 프로젝트 기획 수업',
+      teacherDo:['기획안 양식을 미리 인쇄해두세요 (A4 1장)','팀 구성(3–4명)을 수업 전에 정해두면 좋아요','돌아다니며 막히는 팀에게 힌트 질문 하나씩'],
+      question:'"우리 팀이 AI로 해결하고 싶은 문제가 뭐야?"',
+      qrLabel:'기획안 양식 다운로드',
+      qrUrl:'https://docs.google.com/document/d/example/edit',
+      qrNote:'기획안 템플릿 — 인쇄해서 팀별 배포',
+      prep:'준비물: 기획안 양식 인쇄 (팀 수만큼)',
+      timeBlocks:[
+        {label:'팀 구성', mins:5, color:'#0A7B6B'},
+        {label:'기획안 작성', mins:20, color:'#0D9E8A'},
+        {label:'1분 발표', mins:12, color:'#0A7B6B'},
+        {label:'기대감 업', mins:3, color:'#0D9E8A'},
+      ],
+    },
+    8: {
+      color:'#D4A843',
+      emoji:'🛠️',
+      headline:'실제 제작 시작 수업',
+      teacherDo:['7차시 기획안을 팀별로 돌려주세요','제작 도구 QR을 칠판에 띄워두세요','"완성 못 해도 OK"라고 먼저 말해주세요'],
+      question:'"오늘 이것만큼은 꼭 만들고 가겠다, 는 게 뭐야?"',
+      qrLabel:'AI 제작 도구 모음',
+      qrUrl:'https://gamma.app',
+      qrNote:'Gamma(발표), Canva(포스터), CapCut(영상) — 선택 사용',
+      prep:'준비물: 없음 (노트북/태블릿 1인 1대)',
+      timeBlocks:[
+        {label:'기획안 확인', mins:5, color:'#D4A843'},
+        {label:'팀별 제작', mins:25, color:'#E8A82A'},
+        {label:'중간 공유', mins:8, color:'#D4A843'},
+        {label:'다음 예고', mins:2, color:'#E8A82A'},
+      ],
+    },
+    9: {
+      color:'#D4A843',
+      emoji:'✨',
+      headline:'완성 + 발표 준비 수업',
+      teacherDo:['8차시 초안을 다시 펼치게 해주세요','리허설 발표 2분을 꼭 해보게 해주세요','학부모 초대를 이 시간에 공지해주세요'],
+      question:'"우리 팀에서 가장 잘 된 부분이 어디야?"',
+      qrLabel:'발표 자료 템플릿',
+      qrUrl:'https://gamma.app/generate',
+      qrNote:'발표 슬라이드 AI 자동 생성 — Gamma 사용',
+      prep:'준비물: 없음 / 학부모 초대장 인쇄 (선택)',
+      timeBlocks:[
+        {label:'초안 마무리', mins:5, color:'#D4A843'},
+        {label:'결과물 완성', mins:23, color:'#E8A82A'},
+        {label:'리허설 발표', mins:10, color:'#D4A843'},
+        {label:'초대 공지', mins:2, color:'#E8A82A'},
+      ],
+    },
+    10: {
+      color:'#0D9E8A',
+      emoji:'🎤',
+      headline:'발표회 + 포트폴리오 수업',
+      teacherDo:['포트폴리오를 예쁘게 묶어서 준비해주세요','학부모 참관 시 자리를 미리 마련해주세요','마지막에 꼭 박수를 크게 유도해주세요'],
+      question:'"10차시 동안 가장 기억에 남은 순간이 뭐야?"',
+      qrLabel:'포트폴리오 제출 링크',
+      qrUrl:'https://docs.google.com/forms/d/e/1FAIpQLSf_portfolio/viewform',
+      qrNote:'디지털 포트폴리오 제출 — 학부모 공유용',
+      prep:'준비물: 포트폴리오 묶음 (1인 1부) / 스낵 (선택 🎉)',
+      timeBlocks:[
+        {label:'포트폴리오 정리', mins:5, color:'#0D9E8A'},
+        {label:'팀별 발표', mins:25, color:'#0A7B6B'},
+        {label:'상호 피드백', mins:8, color:'#0D9E8A'},
+        {label:'수료 마무리', mins:2, color:'#0A7B6B'},
+      ],
+    },
+  };
+
+  const guide = TEACHER_GUIDES[sess.num];
+
+  const demoPanel = sess.demoType && !isEthics ? `
+    <div class="session-demo-panel">
+      <div class="demo-box" id="demoBox-${sess.num}">
+        <div class="demo-placeholder" id="demoPlaceholder-${sess.num}">
+          <span class="demo-icon">${{hands:'🖐️',face:'😊',pose:'🧍',yolo:'👁️'}[sess.demoType]}</span>
+          <p>${sess.demoDesc}</p>
+        </div>
+        <video class="demo-video" id="demoVideo-${sess.num}" playsinline autoplay muted></video>
+        <canvas class="demo-canvas" id="demoCanvas-${sess.num}"></canvas>
+        <div class="demo-status live" id="demoStatus-${sess.num}">LIVE</div>
+        <div class="demo-info-label" id="demoInfo-${sess.num}"></div>
+      </div>
+      <div class="demo-result-bar" id="demoResult-${sess.num}" style="display:none;"></div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn-demo start" id="btnStart-${sess.num}" onclick="startDemo(${sess.num},'${sess.demoType}')" style="flex:1;">
+          📷 데모 체험하기
+        </button>
+        <button class="btn-demo stop" id="btnStop-${sess.num}" onclick="stopDemo(${sess.num})" style="flex:1;display:none;">
+          ⏹ 체험 중단
+        </button>
+      </div>
+    </div>` : guide ? `
+    <div class="session-demo-panel" style="padding:20px;gap:12px;overflow-y:auto;">
+      <div style="background:rgba(255,255,255,0.05);border-radius:12px;padding:14px 16px;border-left:3px solid ${guide.color};">
+        <div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:${guide.color};margin-bottom:6px;">선생님 준비 체크</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.55);margin-bottom:8px;">${guide.prep}</div>
+        ${guide.teacherDo.map(d=>`<div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:5px;"><span style="color:${guide.color};font-weight:700;font-size:13px;margin-top:-1px;">✓</span><span style="font-size:12px;color:rgba(255,255,255,0.75);line-height:1.5;">${d}</span></div>`).join('')}
+      </div>
+      <div style="background:rgba(255,255,255,0.05);border-radius:12px;padding:14px 16px;">
+        <div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-bottom:8px;">타임라인 (40분)</div>
+        <div style="display:flex;gap:2px;border-radius:6px;overflow:hidden;height:28px;margin-bottom:6px;">
+          ${guide.timeBlocks.map(b=>`<div style="flex:${b.mins};background:${b.color};display:flex;align-items:center;justify-content:center;"><span style="font-size:9px;font-weight:700;color:white;white-space:nowrap;padding:0 4px;">${b.label}</span></div>`).join('')}
+        </div>
+        <div style="display:flex;gap:2px;">
+          ${guide.timeBlocks.map(b=>`<div style="flex:${b.mins};text-align:center;"><span style="font-size:9px;color:rgba(255,255,255,0.3);">${b.mins}분</span></div>`).join('')}
+        </div>
+      </div>
+      <div style="background:rgba(255,255,255,0.05);border-radius:12px;padding:14px 16px;border-left:3px solid rgba(255,255,255,0.15);">
+        <div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-bottom:6px;">아이들에게 던질 질문</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.8);font-style:italic;line-height:1.5;">${guide.question}</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.05);border-radius:12px;padding:14px 16px;">
+        <div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-bottom:10px;">📱 수업 QR 예시</div>
+        <div style="display:flex;gap:12px;align-items:center;">
+          <div style="background:white;padding:6px;border-radius:8px;flex-shrink:0;">
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=${encodeURIComponent(guide.qrUrl)}&bgcolor=ffffff&color=0D2E3A" width="80" height="80" alt="QR" style="display:block;border-radius:4px;" />
+          </div>
+          <div>
+            <div style="font-size:12px;font-weight:700;color:${guide.color};margin-bottom:4px;">${guide.qrLabel}</div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.5);line-height:1.5;">${guide.qrNote}</div>
+            <div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:4px;">* 실제 수업에선 맞춤 QR 제공</div>
+          </div>
+        </div>
+      </div>
+    </div>` : `
+    <div class="session-demo-panel" style="justify-content:center;align-items:center;">
+      <div style="text-align:center;padding:20px;">
+        <div style="font-size:48px;margin-bottom:16px;">✍️</div>
+        <p style="font-size:13px;color:rgba(255,255,255,0.4);line-height:1.6;">체험 대신 토론과 창작으로 진행되는 핵심 차시</p>
+      </div>
+    </div>`;
+
+  const ethicsExtra = isEthics ? `
+    <div class="ethics-card">
+      <h4>✍️ 나만의 AI 윤리 선언문 — 작성 예시</h4>
+      <div class="ethics-items">
+        <div class="ethics-item"><div class="ethics-num">1</div><p>나는 AI의 답을 그대로 믿지 않고 항상 직접 확인하겠습니다</p></div>
+        <div class="ethics-item"><div class="ethics-num">2</div><p>나는 AI가 만든 것을 내 것인 척 하지 않겠습니다</p></div>
+        <div class="ethics-item"><div class="ethics-num">3</div><p>나는 AI의 판단이 편향될 수 있다는 것을 기억하겠습니다</p></div>
+        <div class="ethics-item"><div class="ethics-num">4</div><p>나는 AI를 도구로 쓰되, 최종 결정은 내가 하겠습니다</p></div>
+        <div class="ethics-item"><div class="ethics-num">5</div><p>나는 AI로 다른 사람에게 피해를 주지 않겠습니다</p></div>
+      </div>
+    </div>` : '';
+
+  const card = document.createElement('div');
+  card.className = 'session-card' + (idx===0?' active':'');
+  card.id = `card-${sess.num}`;
+  card.innerHTML = `
+    <div class="session-header">
+      <div class="session-num bg-${sess.phaseClass}">${sess.num}</div>
+      <div class="session-info">
+        <div class="session-phase phase-${sess.phaseClass}">${sess.phase}</div>
+        <div class="session-name">${sess.title}</div>
+        <div class="session-tool">🔧 ${sess.tool}</div>
+      </div>
+      <div class="session-goal">${sess.goal}</div>
+    </div>
+    <div class="session-body">
+      <div class="session-flow">
+        <div class="flow-title">수업 흐름 (40분)</div>
+        ${flowRows}
+      </div>
+      ${demoPanel}
+    </div>
+    ${ethicsExtra}
+    <div class="session-footer">
+      <div class="footer-card">
+        <div class="footer-card-label phase-${sess.phaseClass}">차시 결과물</div>
+        <p>${sess.result}</p>
+      </div>
+      <div class="footer-card">
+        <div class="footer-card-label" style="color:var(--coral)">선생님 꿀팁</div>
+        <p>${sess.tip}</p>
+      </div>
+      <div class="footer-card">
+        <div class="footer-card-label phase-${sess.phaseClass}">포트폴리오 연결</div>
+        <p>${sess.portfolio}</p>
+      </div>
+    </div>`;
+  cardsEl.appendChild(card);
+});
+
+// ── DEMO ENGINE — MediaPipe Tasks Vision (no external model server) ────────────
+const activeStreams = {};
+const activeLoops   = {};
+const loadedModels  = {};
+let mpVision = null; // MediaPipe Tasks Vision module
+
+// MediaPipe Tasks Vision 초기화 (한 번만)
+async function initVision() {
+  if (mpVision) return mpVision;
+  // vision_bundle.js 가 window.mediapipeTasks 또는 비슷한 이름으로 노출
+  // Tasks Vision 0.10.x 에서는 전역 객체로 노출됨
+  if (typeof vision !== 'undefined') { mpVision = vision; return mpVision; }
+  // 폴백: FilesetResolver 직접 접근
+  if (typeof FilesetResolver !== 'undefined') {
+    mpVision = { FilesetResolver, HandLandmarker, FaceLandmarker, PoseLandmarker, ObjectDetector };
+    return mpVision;
+  }
+  throw new Error('MediaPipe Tasks Vision 로드 실패');
+}
+
+function getEls(num) {
+  return {
+    video:       document.getElementById(`demoVideo-${num}`),
+    canvas:      document.getElementById(`demoCanvas-${num}`),
+    placeholder: document.getElementById(`demoPlaceholder-${num}`),
+    status:      document.getElementById(`demoStatus-${num}`),
+    info:        document.getElementById(`demoInfo-${num}`),
+    result:      document.getElementById(`demoResult-${num}`),
+    btnStart:    document.getElementById(`btnStart-${num}`),
+    btnStop:     document.getElementById(`btnStop-${num}`),
+  };
+}
+
+async function startDemo(num, type) {
+  const el = getEls(num);
+  el.btnStart.textContent = '📷 카메라 연결 중...';
+  el.btnStart.disabled = true;
+  el.info.style.display = 'block';
+  el.info.textContent = '🔄 AI 모델 초기화 중...';
+
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { width: 1280, height: 720, facingMode: 'user' }, audio: false
+    });
+    activeStreams[num] = stream;
+    el.video.srcObject = stream;
+    await el.video.play();
+
+    el.canvas.width  = 1280;
+    el.canvas.height = 720;
+    el.video.style.display   = 'none';
+    el.canvas.style.display  = 'block';
+    el.placeholder.style.display = 'none';
+    el.status.style.display  = 'flex';
+    el.btnStart.style.display = 'none';
+    el.btnStop.style.display  = 'flex';
+
+    if      (type === 'hands') await runHands(num, el);
+    else if (type === 'face')  await runFace(num, el);
+    else if (type === 'pose')  await runPose(num, el);
+    else if (type === 'yolo')  await runYolo(num, el);
+
+  } catch(e) {
+    console.error(e);
+    el.btnStart.textContent = '📷 데모 체험하기';
+    el.btnStart.disabled = false;
+    if (e.name === 'NotAllowedError') {
+      alert('카메라 권한이 필요해요!\n브라우저 주소창 왼쪽 자물쇠 아이콘 → 카메라 허용');
+    } else {
+      alert('오류: ' + e.message);
+    }
+  }
+}
+
+function stopDemo(num) {
+  activeLoops[num] = false;
+  if (activeStreams[num]) {
+    activeStreams[num].getTracks().forEach(t => t.stop());
+    delete activeStreams[num];
+  }
+  const el = getEls(num);
+  if (el.video)       { el.video.style.display = 'none'; el.video.srcObject = null; }
+  if (el.canvas)        el.canvas.style.display = 'none';
+  if (el.placeholder)   el.placeholder.style.display = 'flex';
+  if (el.status)        el.status.style.display = 'none';
+  if (el.result)      { el.result.style.display = 'none'; el.result.innerHTML = ''; }
+  if (el.btnStart) { el.btnStart.style.display = 'flex'; el.btnStart.textContent = '📷 데모 체험하기'; el.btnStart.disabled = false; }
+  if (el.btnStop)       el.btnStop.style.display = 'none';
+}
+
+// WASM 경로 (jsdelivr CDN — storage.googleapis.com 완전 미사용)
+const WASM_PATH = 'wasm';
+
+// FilesetResolver 등 전역 객체 안전하게 가져오기
+function getMP() {
+  // vision_bundle.min.js 는 전역에 직접 노출
+  if (typeof FilesetResolver !== 'undefined') return true;
+  // 혹시 mp 네임스페이스 아래 있을 경우
+  if (typeof mp !== 'undefined' && mp.tasks && mp.tasks.vision) {
+    window.FilesetResolver  = mp.tasks.vision.FilesetResolver;
+    window.HandLandmarker   = mp.tasks.vision.HandLandmarker;
+    window.FaceLandmarker   = mp.tasks.vision.FaceLandmarker;
+    window.PoseLandmarker   = mp.tasks.vision.PoseLandmarker;
+    window.ObjectDetector   = mp.tasks.vision.ObjectDetector;
+    return true;
+  }
+  return false;
+}
+
+async function waitForMP(timeout = 10000) {
+  const start = Date.now();
+  while (!getMP()) {
+    if (Date.now() - start > timeout) throw new Error('MediaPipe 라이브러리 로드 시간 초과');
+    await new Promise(r => setTimeout(r, 200));
+  }
+}
+
+// ── 1차시: HAND TRACKING ──────────────────────────────────────────────────────
+const HAND_CONNECTIONS = [
+  [0,1],[1,2],[2,3],[3,4],[0,5],[5,6],[6,7],[7,8],
+  [0,9],[9,10],[10,11],[11,12],[0,13],[13,14],[14,15],[15,16],
+  [0,17],[17,18],[18,19],[19,20],[5,9],[9,13],[13,17],
+];
+
+async function runHands(num, el) {
+  try {
+    await waitForMP();
+    if (!loadedModels['hands']) {
+      el.info.textContent = '🔄 손 인식 모델 로딩 중...';
+      loadedModels['hands'] = await HandLandmarker.createFromOptions(
+        await FilesetResolver.forVisionTasks(WASM_PATH), {
+          baseOptions: { modelAssetPath:'models/hand_landmarker.task', delegate:'GPU' },
+          runningMode:'VIDEO', numHands:2,
+        });
+    }
+  } catch(e) { el.info.textContent='❌ 모델 로드 실패: '+e.message; return; }
+
+  const landmarker = loadedModels['hands'];
+  el.info.textContent = '✋ 손을 카메라에 보여주세요!';
+  if (el.result) { el.result.style.display='flex'; el.result.innerHTML='검지로 물건을 잡아 움직여보세요!'; }
+  activeLoops[num] = true;
+  const W=1280, H=720;
+  el.canvas.width=W; el.canvas.height=H;
+  const ctx = el.canvas.getContext('2d');
+  let lastTime=-1;
+
+  // ── 떠다니는 물건들 ──
+  const EMOJIS = ['🌟','⚽','🎈','❤️','🎵'];
+  const items = EMOJIS.map((em, i) => ({
+    emoji: em,
+    x: 200 + i * 200 + Math.random()*100,
+    y: 150 + Math.random()*(H-300),
+    vx: (Math.random()-0.5)*1.5,
+    vy: (Math.random()-0.5)*1.5,
+    size: 56,
+    grabbed: false,       // 현재 잡힌 상태
+    grabbedBy: -1,        // 잡은 손 인덱스
+    flingVx: 0,
+    flingVy: 0,
+    bobPhase: Math.random()*Math.PI*2,  // 둥둥 떠다니는 위상
+  }));
+
+  const GRAB_DIST = 60;       // 잡기 판정 거리
+  const FLING_FRICTION = 0.97; // 튕겨나간 뒤 감속
+
+  // 손 열림 감지 (검지~소지 끝이 MCP보다 충분히 멀면 열린 손)
+  function isHandOpen(mkp) {
+    // 각 손가락 끝(8,12,16,20)이 PIP(6,10,14,18)보다 손목(0)에서 더 먼지 확인
+    let openCount = 0;
+    const pairs = [[8,6],[12,10],[16,14],[20,18]];
+    const w = mkp[0];
+    pairs.forEach(([tip,pip]) => {
+      const dTip = Math.hypot(mkp[tip].x-w.x, mkp[tip].y-w.y);
+      const dPip = Math.hypot(mkp[pip].x-w.x, mkp[pip].y-w.y);
+      if (dTip > dPip + 15) openCount++;
+    });
+    return openCount >= 3;
+  }
+
+  // 이전 프레임 검지 위치 (손별)
+  const prevTip = {};
+  let grabCount = 0;
+
+  const loop = () => {
+    if (!activeLoops[num]||!activeStreams[num]) return;
+    // 미러 그리기
+    ctx.save(); ctx.translate(W,0); ctx.scale(-1,1);
+    ctx.drawImage(el.video,0,0,W,H); ctx.restore();
+
+    // ── 물건 물리 업데이트 ──
+    const now = performance.now();
+    items.forEach(it => {
+      if (!it.grabbed) {
+        // 튕겨나간 속도 적용
+        if (Math.abs(it.flingVx)>0.3 || Math.abs(it.flingVy)>0.3) {
+          it.x += it.flingVx;
+          it.y += it.flingVy;
+          it.flingVx *= FLING_FRICTION;
+          it.flingVy *= FLING_FRICTION;
+        } else {
+          // 둥둥 떠다니기
+          it.bobPhase += 0.02;
+          it.x += it.vx + Math.sin(it.bobPhase)*0.4;
+          it.y += it.vy + Math.cos(it.bobPhase*0.7)*0.3;
+        }
+        // 벽 바운스
+        if (it.x < it.size) { it.x = it.size; it.vx = Math.abs(it.vx); it.flingVx = Math.abs(it.flingVx)*0.6; }
+        if (it.x > W-it.size) { it.x = W-it.size; it.vx = -Math.abs(it.vx); it.flingVx = -Math.abs(it.flingVx)*0.6; }
+        if (it.y < it.size) { it.y = it.size; it.vy = Math.abs(it.vy); it.flingVy = Math.abs(it.flingVy)*0.6; }
+        if (it.y > H-it.size) { it.y = H-it.size; it.vy = -Math.abs(it.vy); it.flingVy = -Math.abs(it.flingVy)*0.6; }
+      }
+    });
+
+    // ── 손 인식 + 물건 인터랙션 ──
+    if (now!==lastTime) {
+      lastTime=now;
+      try {
+        const result=landmarker.detectForVideo(el.video,now);
+        // 잡기 해제: 손이 사라지면
+        const activeHands = new Set();
+        if (result&&result.landmarks) {
+          result.landmarks.forEach((lm,hi)=>{
+            activeHands.add(hi);
+            const mkp=lm.map(p=>({x:(1-p.x)*W, y:p.y*H}));
+            const tip8 = mkp[8]; // 검지 끝
+
+            // 손 열림 감지
+            const open = isHandOpen(mkp);
+
+            // 이전 프레임 검지 속도
+            const prev = prevTip[hi] || {x:tip8.x, y:tip8.y};
+            const tipVx = tip8.x - prev.x;
+            const tipVy = tip8.y - prev.y;
+            const tipSpeed = Math.hypot(tipVx, tipVy);
+            prevTip[hi] = {x:tip8.x, y:tip8.y};
+
+            // 잡고 있는 물건 처리
+            items.forEach(it => {
+              if (it.grabbed && it.grabbedBy === hi) {
+                // 손을 빠르게 펴면 튕겨나가기
+                if (open && tipSpeed > 8) {
+                  it.grabbed = false;
+                  it.grabbedBy = -1;
+                  it.flingVx = tipVx * 2.5;
+                  it.flingVy = tipVy * 2.5;
+                  grabCount++;
+                } else {
+                  // 잡힌 채로 따라가기
+                  it.x = tip8.x;
+                  it.y = tip8.y;
+                  it.flingVx = 0;
+                  it.flingVy = 0;
+                }
+              }
+            });
+
+            // 잡기 시도 (검지가 물건 근처)
+            if (!open) {
+              items.forEach(it => {
+                if (it.grabbed) return;
+                const d = Math.hypot(it.x - tip8.x, it.y - tip8.y);
+                if (d < GRAB_DIST) {
+                  it.grabbed = true;
+                  it.grabbedBy = hi;
+                  it.flingVx = 0;
+                  it.flingVy = 0;
+                }
+              });
+            }
+
+            // ── 관절 그리기 (기존 유지) ──
+            ctx.strokeStyle='rgba(13,158,138,0.9)'; ctx.lineWidth=4;
+            HAND_CONNECTIONS.forEach(([a,b])=>{
+              ctx.beginPath(); ctx.moveTo(mkp[a].x,mkp[a].y);
+              ctx.lineTo(mkp[b].x,mkp[b].y); ctx.stroke();
+            });
+            mkp.forEach((p,i)=>{
+              const isTip=[4,8,12,16,20].includes(i);
+              ctx.beginPath(); ctx.arc(p.x,p.y,isTip?12:7,0,Math.PI*2);
+              ctx.fillStyle=isTip?'#E8613A':'#0D9E8A'; ctx.fill();
+            });
+
+            // 검지 끝 강조 (잡기 포인터)
+            ctx.beginPath(); ctx.arc(tip8.x,tip8.y,GRAB_DIST,0,Math.PI*2);
+            ctx.strokeStyle='rgba(232,97,58,0.25)'; ctx.lineWidth=2; ctx.stroke();
+
+            // 손 이름
+            const wrist=mkp[0];
+            const hLabel = wrist.x < W/2 ? '왼손' : '오른손';
+            ctx.fillStyle='rgba(0,0,0,0.85)'; ctx.fillRect(wrist.x-60,wrist.y-44,120,38);
+            ctx.fillStyle='#C8EDE6'; ctx.font='bold 24px sans-serif'; ctx.textAlign='center';
+            ctx.fillText(hLabel, wrist.x, wrist.y-16);
+          });
+        }
+        // 손 사라지면 잡기 해제
+        items.forEach(it => {
+          if (it.grabbed && !activeHands.has(it.grabbedBy)) {
+            it.grabbed = false; it.grabbedBy = -1;
+          }
+        });
+
+        const cnt = result?.landmarks?.length || 0;
+        const grabbedCnt = items.filter(it=>it.grabbed).length;
+        el.info.textContent = cnt>0 ? `✋ 손 ${cnt}개 감지` : '✋ 손을 카메라에 보여주세요';
+        if (el.result) {
+          if (cnt === 0) {
+            el.result.innerHTML='손을 카메라에 보여주세요 — 검지로 물건을 잡아보세요!';
+          } else if (grabbedCnt > 0) {
+            el.result.innerHTML=`🤏 <b>${grabbedCnt}개</b> 잡는 중! — 손을 빠르게 펴서 던져보세요`;
+          } else {
+            el.result.innerHTML=`👋 손 ${cnt}개 감지 — 검지 끝을 물건에 가까이 대보세요`;
+          }
+        }
+      } catch(e){}
+    }
+
+    // ── 물건 그리기 (항상 최상위) ──
+    items.forEach(it => {
+      ctx.font = `${it.grabbed ? it.size+12 : it.size}px serif`;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      // 잡힌 물건 글로우
+      if (it.grabbed) {
+        ctx.shadowColor = '#E8613A';
+        ctx.shadowBlur = 24;
+      }
+      ctx.fillText(it.emoji, it.x, it.y);
+      ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
+      // 튕겨나갈 때 잔상
+      if (!it.grabbed && (Math.abs(it.flingVx)>3 || Math.abs(it.flingVy)>3)) {
+        ctx.globalAlpha = 0.3;
+        ctx.fillText(it.emoji, it.x - it.flingVx*2, it.y - it.flingVy*2);
+        ctx.globalAlpha = 1;
+      }
+    });
+
+    // ── 안내 오버레이 ──
+    ctx.fillStyle='rgba(0,0,0,0.7)'; ctx.fillRect(0,H-42,W,42);
+    ctx.font='bold 18px sans-serif'; ctx.textAlign='center';
+    ctx.fillStyle='rgba(255,255,255,0.8)';
+    ctx.fillText('🤏 검지로 물건 잡기  →  ✋ 손 펴서 던지기  |  던진 횟수: '+grabCount, W/2, H-15);
+
+    if(activeLoops[num]) requestAnimationFrame(loop);
+  };
+  requestAnimationFrame(loop);
+}
+
+async function runFace(num, el) {
+  try {
+    await waitForMP();
+    if (!loadedModels['face']) {
+      el.info.textContent='🔄 얼굴 인식 모델 로딩 중...';
+      loadedModels['face'] = await FaceLandmarker.createFromOptions(
+        await FilesetResolver.forVisionTasks(WASM_PATH), {
+          baseOptions:{modelAssetPath:'models/face_landmarker.task',delegate:'GPU'},
+          runningMode:'VIDEO', numFaces:1, outputFaceBlendshapes:true,
+        });
+    }
+  } catch(e){el.info.textContent='❌ 모델 로드 실패: '+e.message; return;}
+
+  const landmarker=loadedModels['face'];
+  el.info.textContent='😊 얼굴을 카메라에 보여주세요!';
+  if(el.result){el.result.style.display='flex'; el.result.innerHTML='얼굴을 카메라에 보여주세요';}
+  activeLoops[num]=true;
+  const W=1280,H=720;
+  el.canvas.width=W; el.canvas.height=H;
+  const ctx=el.canvas.getContext('2d');
+  const HW=W/2;
+  const OVAL=[10,338,297,332,284,251,389,356,454,323,361,288,397,365,379,378,400,377,152,148,176,149,150,136,172,58,132,93,234,127,162,21,54,103,67,109];
+  let lastTime=-1;
+
+  const loop=()=>{
+    if(!activeLoops[num]||!activeStreams[num]) return;
+    // 왼쪽: 미러 카메라
+    ctx.save(); ctx.translate(HW,0); ctx.scale(-1,1);
+    ctx.drawImage(el.video,0,0,HW,H); ctx.restore();
+    // 오른쪽: 이모지 패널 (진한 배경)
+    ctx.fillStyle='#0D2E3A'; ctx.fillRect(HW,0,HW,H);
+
+    const now=performance.now();
+    if(now!==lastTime){
+      lastTime=now;
+      try{
+        const result=landmarker.detectForVideo(el.video,now);
+        if(result&&result.faceLandmarks&&result.faceLandmarks.length>0){
+          const lm=result.faceLandmarks[0];
+          const mirX=px=>HW-(px/1*(HW/1));
+          // 얼굴 외곽
+          ctx.beginPath();
+          OVAL.forEach((i,idx)=>{
+            const x=HW-lm[i].x*HW, y=lm[i].y*H;
+            idx===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+          });
+          ctx.closePath(); ctx.strokeStyle='rgba(13,158,138,0.8)'; ctx.lineWidth=2; ctx.stroke();
+          // 메시
+          for(let i=0;i<lm.length;i+=6){
+            ctx.beginPath(); ctx.arc(HW-lm[i].x*HW,lm[i].y*H,2,0,Math.PI*2);
+            ctx.fillStyle='rgba(13,158,138,0.5)'; ctx.fill();
+          }
+
+          // 표정 분석 (blendshapes)
+          let emoji='😐',label='무표정',col='#94a3b8';
+          if(result.faceBlendshapes&&result.faceBlendshapes[0]){
+            const bs={};
+            result.faceBlendshapes[0].categories.forEach(c=>{bs[c.categoryName]=c.score;});
+            const jaw=bs['jawOpen']||0;
+            const smL=bs['mouthSmileLeft']||0, smR=bs['mouthSmileRight']||0;
+            const blinkL=bs['eyeBlinkLeft']||0, blinkR=bs['eyeBlinkRight']||0;
+            const browD=bs['browDownLeft']||0;
+            const smile=(smL+smR)/2;
+            if((blinkL+blinkR)/2>0.6){emoji='😴';label='눈 감음';col='#94a3b8';}
+            else if(jaw>0.55){emoji='😲';label='놀람!';col='#fbbf24';}
+            else if(smile>0.5&&jaw>0.2){emoji='😄';label='크게 웃는 중!';col='#4ade80';}
+            else if(smile>0.3){emoji='😊';label='웃고 있어요';col='#4ade80';}
+            else if(browD>0.4){emoji='😠';label='화난 표정';col='#f87171';}
+          }
+
+          // 오른쪽 이모지 패널
+          const cx=HW+HW/2, cy=H/2-40;
+          // 배경 원 (더 크게)
+          ctx.beginPath(); ctx.arc(cx,cy,180,0,Math.PI*2);
+          ctx.fillStyle='rgba(255,255,255,0.06)'; ctx.fill();
+          ctx.beginPath(); ctx.arc(cx,cy,140,0,Math.PI*2);
+          ctx.fillStyle='rgba(255,255,255,0.06)'; ctx.fill();
+          // 이모지 (크고 선명하게 — 200px)
+          ctx.font='200px serif';
+          ctx.textAlign='center'; ctx.textBaseline='middle';
+          ctx.fillText(emoji, cx, cy);
+          // 라벨 배경 (더 크게)
+          ctx.fillStyle=col+'44';
+          ctx.fillRect(HW+30, cy+140, HW-60, 64);
+          ctx.fillStyle=col; ctx.font='bold 34px sans-serif';
+          ctx.textBaseline='alphabetic';
+          ctx.fillText(label, cx, cy+182);
+          // 안내
+          ctx.fillStyle='rgba(255,255,255,0.5)'; ctx.font='bold 20px sans-serif';
+          ctx.fillText('다양한 표정을 지어보세요!', cx, H-24);
+
+          el.info.textContent=`${emoji} 표정: ${label}`;
+          if(el.result) el.result.innerHTML=`${emoji} <b style="color:${col}">${label}</b> — 다양한 표정을 지어보세요!`;
+        } else {
+          ctx.font='180px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+          ctx.fillText('🙂', HW+HW/2, H/2-20);
+          ctx.fillStyle='rgba(255,255,255,0.4)'; ctx.font='bold 22px sans-serif';
+          ctx.textBaseline='alphabetic';
+          ctx.fillText('얼굴을 카메라에 보여주세요', HW+HW/2, H/2+100);
+          el.info.textContent='😊 얼굴을 카메라 정면으로 보여주세요';
+          if(el.result) el.result.innerHTML='얼굴을 카메라에 보여주세요';
+        }
+      }catch(e){}
+    }
+    if(activeLoops[num]) requestAnimationFrame(loop);
+  };
+  requestAnimationFrame(loop);
+}
+
+const POSE_CONN=[[11,12],[11,13],[13,15],[12,14],[14,16],[11,23],[12,24],[23,24],[23,25],[25,27],[24,26],[26,28]];
+
+async function runPose(num, el) {
+  try {
+    await waitForMP();
+    if(!loadedModels['pose']){
+      el.info.textContent='🔄 포즈 인식 모델 로딩 중...';
+      loadedModels['pose']=await PoseLandmarker.createFromOptions(
+        await FilesetResolver.forVisionTasks(WASM_PATH),{
+          baseOptions:{modelAssetPath:'models/pose_landmarker.task',delegate:'GPU'},
+          runningMode:'VIDEO', numPoses:1,
+        });
+    }
+  }catch(e){el.info.textContent='❌ 모델 로드 실패: '+e.message; return;}
+
+  const landmarker=loadedModels['pose'];
+  const W=1280,H=720;
+  el.canvas.width=W; el.canvas.height=H;
+  activeLoops[num]=true;
+  const ctx=el.canvas.getContext('2d');
+  const QS=[
+    {q:'AI는 항상 정답을 말한다?',ans:false},
+    {q:'AI도 편향(bias)을 가질 수 있다?',ans:true},
+    {q:'AI가 만든 글을 내 것이라 해도 된다?',ans:false},
+    {q:'AI 결과는 직접 확인해야 한다?',ans:true},
+    {q:'AI는 감정을 느낄 수 있다?',ans:false},
+  ];
+  let qIdx=0,resultMsg='',holdPose='',holdCount=0,lastTime=-1;
+
+  function detectOX(lm){
+    const lw=lm[15],rw=lm[16],ls=lm[11],rs=lm[12];
+    if(!lw||!rw||lw.visibility<0.35||rw.visibility<0.35) return '';
+    const mlwx=(1-lw.x)*W, mrwx=(1-rw.x)*W;
+    const bothUp=lw.y<(ls?ls.y:1)-0.05&&rw.y<(rs?rs.y:1)-0.05;
+    if(Math.abs(mlwx-mrwx)<150&&bothUp) return 'O';
+    if(mlwx>mrwx&&Math.abs(mlwx-mrwx)>100&&Math.abs(lw.y-rw.y)<0.2) return 'X';
+    return '';
+  }
+
+  if(el.result){
+    el.result.style.display='flex';
+    el.result.innerHTML='🎮 <b>O:</b> 양팔 머리 위로 모으기 &nbsp;|&nbsp; <b>X:</b> 팔 교차해서 X자 만들기';
+  }
+
+  const loop=()=>{
+    if(!activeLoops[num]||!activeStreams[num]) return;
+    ctx.save(); ctx.translate(W,0); ctx.scale(-1,1);
+    ctx.drawImage(el.video,0,0,W,H); ctx.restore();
+
+    const now=performance.now();
+    if(now!==lastTime){
+      lastTime=now;
+      try{
+        const result=landmarker.detectForVideo(el.video,now);
+        if(result&&result.landmarks&&result.landmarks.length>0){
+          const lm=result.landmarks[0];
+          POSE_CONN.forEach(([a,b])=>{
+            const pa=lm[a],pb=lm[b]; if(!pa||!pb) return;
+            ctx.beginPath(); ctx.moveTo((1-pa.x)*W,pa.y*H); ctx.lineTo((1-pb.x)*W,pb.y*H);
+            ctx.strokeStyle='rgba(13,158,138,0.85)'; ctx.lineWidth=5; ctx.stroke();
+          });
+          lm.forEach((p,i)=>{
+            if(i<11) return;
+            ctx.beginPath(); ctx.arc((1-p.x)*W,p.y*H,10,0,Math.PI*2);
+            ctx.fillStyle=[15,16].includes(i)?'#E8613A':'#0D9E8A'; ctx.fill();
+          });
+          const pose=detectOX(lm);
+          if(pose&&pose===holdPose) holdCount++;
+          else{holdPose=pose; holdCount=pose?1:0;}
+          if(holdCount>12&&resultMsg===''){
+            const q=QS[qIdx%QS.length];
+            const correct=(pose==='O')===q.ans;
+            resultMsg=correct?'✅ 정답!':'❌ 오답!';
+            setTimeout(()=>{qIdx++;resultMsg='';holdCount=0;holdPose='';},2500);
+          }
+          if(holdPose){
+            const pct=Math.min(holdCount/12,1);
+            ctx.fillStyle='rgba(0,0,0,0.6)'; ctx.fillRect(W/2-120,H-50,240,26);
+            ctx.fillStyle=holdPose==='O'?'#4ade80':'#f87171';
+            ctx.fillRect(W/2-120,H-50,240*pct,26);
+            ctx.font='bold 40px sans-serif'; ctx.textAlign='center';
+            ctx.fillStyle=holdPose==='O'?'#4ade80':'#f87171';
+            ctx.fillText(holdPose,W/2,H-62);
+          }
+        }
+      }catch(e){}
+    }
+
+    // 문제 오버레이 (크게)
+    const q=QS[qIdx%QS.length];
+    ctx.fillStyle='rgba(0,0,0,0.88)'; ctx.fillRect(0,0,W,130);
+    ctx.font='bold 22px sans-serif'; ctx.textAlign='left';
+    ctx.fillStyle='#D4A843'; ctx.fillText(`문제 ${(qIdx%QS.length)+1} / ${QS.length}`,24,32);
+    ctx.font='bold 42px sans-serif';
+    ctx.fillStyle='#D4A843'; ctx.fillText(`Q${(qIdx%QS.length)+1}.`,24,90);
+    ctx.fillStyle='#fff'; ctx.fillText(q.q,110,90);
+    // 하단 가이드 바 항상 표시
+    ctx.fillStyle='rgba(0,0,0,0.85)'; ctx.fillRect(0,H-54,W,54);
+    ctx.font='bold 22px sans-serif'; ctx.textAlign='center';
+    ctx.fillStyle='rgba(255,255,255,0.85)';
+    ctx.fillText('⭕ O: 양팔 머리 위로 모으기   |   ❌ X: 팔 교차해서 X자 만들기',W/2,H-18);
+    if(resultMsg){
+      ctx.fillStyle=resultMsg.includes('정답')?'rgba(74,222,128,0.93)':'rgba(248,113,113,0.93)';
+      ctx.fillRect(W/2-160,H/2-60,320,100);
+      ctx.font='bold 52px sans-serif'; ctx.textAlign='center';
+      ctx.fillStyle='#fff'; ctx.fillText(resultMsg,W/2,H/2+20);
+    }
+    el.info.textContent=`🎮 OX 퀴즈 Q${(qIdx%QS.length)+1}/${QS.length}`;
+    if(activeLoops[num]) requestAnimationFrame(loop);
+  };
+  requestAnimationFrame(loop);
+}
+
+const LABELS_KO={
+  person:'사람',bottle:'병',chair:'의자',laptop:'노트북',cell_phone:'휴대폰',
+  book:'책',cup:'컵',keyboard:'키보드',mouse:'마우스',backpack:'가방',
+  umbrella:'우산',handbag:'핸드백',tv:'TV',monitor:'모니터',scissors:'가위',
+  clock:'시계',potted_plant:'화분',remote:'리모컨',bicycle:'자전거',car:'자동차',
+  dog:'강아지',cat:'고양이',teddy_bear:'인형',sports_ball:'공',apple:'사과',orange:'오렌지',bowl:'그릇',
+};
+const YOLO_COLORS=['#4ade80','#60a5fa','#f472b6','#fb923c','#a78bfa','#34d399','#fbbf24'];
+
+async function runYolo(num, el) {
+  try{
+    await waitForMP();
+    if(!loadedModels['yolo']){
+      el.info.textContent='🔄 사물인식 모델 로딩 중...';
+      loadedModels['yolo']=await ObjectDetector.createFromOptions(
+        await FilesetResolver.forVisionTasks(WASM_PATH),{
+          baseOptions:{modelAssetPath:'models/efficientdet.tflite',delegate:'GPU'},
+          runningMode:'VIDEO', maxResults:6, scoreThreshold:0.4,
+        });
+    }
+  }catch(e){el.info.textContent='❌ 모델 로드 실패: '+e.message; return;}
+
+  const detector=loadedModels['yolo'];
+  el.info.textContent='👁️ 카메라를 주변 사물에 비춰보세요!';
+  if(el.result){el.result.style.display='flex'; el.result.innerHTML='사물을 카메라에 비춰보세요';}
+  activeLoops[num]=true;
+  const W=1280,H=720;
+  el.canvas.width=W; el.canvas.height=H;
+  const ctx=el.canvas.getContext('2d');
+  const colorMap={}; let colorIdx=0;
+  let lastTime=-1;
+
+  const loop=()=>{
+    if(!activeLoops[num]||!activeStreams[num]) return;
+    ctx.save(); ctx.translate(W,0); ctx.scale(-1,1);
+    ctx.drawImage(el.video,0,0,W,H); ctx.restore();
+
+    const now=performance.now();
+    if(now!==lastTime){
+      lastTime=now;
+      try{
+        const result=detector.detectForVideo(el.video,now);
+        if(result&&result.detections){
+          // 인식 결과 집계
+          const countMap={};
+          result.detections.forEach(det=>{
+            const raw=det.categories[0]?.categoryName||'';
+            const label=LABELS_KO[raw]||raw;
+            countMap[label]=(countMap[label]||0)+1;
+          });
+
+          result.detections.forEach(det=>{
+            const bb=det.boundingBox;
+            const x=W-bb.originX-bb.width, y=bb.originY, w=bb.width, h=bb.height;
+            const raw=det.categories[0]?.categoryName||'';
+            const label=LABELS_KO[raw]||raw;
+            const conf=Math.round((det.categories[0]?.score||0)*100);
+            if(!colorMap[label]){colorMap[label]=YOLO_COLORS[colorIdx++%YOLO_COLORS.length];}
+            const col=colorMap[label];
+
+            // 박스
+            ctx.strokeStyle=col; ctx.lineWidth=4; ctx.strokeRect(x,y,w,h);
+
+            // 태그 (크게)
+            ctx.font='bold 32px sans-serif';
+            const tw=ctx.measureText(`${label} ${conf}%`).width;
+            const tagH=52,tagW=tw+28;
+            const tagY=y>tagH+4?y-tagH-4:y+h+4;
+            ctx.fillStyle=col; ctx.fillRect(x,tagY,tagW,tagH);
+            ctx.fillStyle='#000'; ctx.textAlign='left';
+            ctx.fillText(`${label}  ${conf}%`,x+12,tagY+tagH-12);
+
+            // 박스 내부 중앙
+            if(w>120&&h>80){
+              ctx.font='bold 36px sans-serif';
+              const lw2=ctx.measureText(label).width;
+              ctx.fillStyle='rgba(0,0,0,0.65)';
+              ctx.fillRect(x+w/2-lw2/2-8,y+h/2-26,lw2+16,44);
+              ctx.fillStyle=col; ctx.textAlign='left';
+              ctx.fillText(label,x+w/2-lw2/2,y+h/2+12);
+            }
+          });
+
+          // 결과 바 업데이트 — 사물별 개수
+          if(Object.keys(countMap).length>0){
+            const summary=Object.entries(countMap)
+              .map(([label,cnt])=>`<span style="color:${colorMap[label]||'#fff'};font-weight:700;">${label}</span> ${cnt}개`)
+              .join('&nbsp;&nbsp;|&nbsp;&nbsp;');
+            el.info.textContent=`👁️ ${result.detections.length}개 사물 인식`;
+            if(el.result) el.result.innerHTML='👁️ &nbsp;'+summary;
+          } else {
+            el.info.textContent='👁️ 사물을 카메라에 가까이 가져와보세요';
+            if(el.result) el.result.innerHTML='사물을 카메라에 가까이 가져와보세요';
+          }
+        }
+      }catch(e){}
+    }
+    if(activeLoops[num]) setTimeout(()=>{if(activeLoops[num])loop();},80);
+  };
+  loop();
+}
+</script>
+</body>
+</html>
