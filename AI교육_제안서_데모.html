@@ -1761,11 +1761,6 @@ async function runPose(num, el) {
     ctx.font='bold 42px sans-serif';
     ctx.fillStyle='#D4A843'; ctx.fillText(`Q${(qIdx%QS.length)+1}.`,24,90);
     ctx.fillStyle='#fff'; ctx.fillText(q.q,110,90);
-    // 하단 가이드 바 항상 표시
-    ctx.fillStyle='rgba(0,0,0,0.85)'; ctx.fillRect(0,H-54,W,54);
-    ctx.font='bold 22px sans-serif'; ctx.textAlign='center';
-    ctx.fillStyle='rgba(255,255,255,0.85)';
-    ctx.fillText('⭕ O: 양손 머리 위로 동그랗게   |   ❌ X: 팔짱 교차하기',W/2,H-18);
     if(resultMsg){
       ctx.fillStyle=resultMsg.includes('정답')?'rgba(74,222,128,0.93)':'rgba(248,113,113,0.93)';
       ctx.fillRect(W/2-160,H/2-60,320,100);
