@@ -1661,18 +1661,32 @@ async function runPose(num, el) {
   let qIdx=0,resultMsg='',holdPose='',holdCount=0,lastTime=-1;
 
   function detectOX(lm){
-    const lw=lm[15],rw=lm[16],ls=lm[11],rs=lm[12];
-    if(!lw||!rw||lw.visibility<0.35||rw.visibility<0.35) return '';
+    // 미러 좌표 기준 (화면에 보이는 대로)
+    const nose=lm[0], lw=lm[15], rw=lm[16], ls=lm[11], rs=lm[12];
+    if(!lw||!rw||!nose) return '';
+    if((lw.visibility||0)<0.3||(rw.visibility||0)<0.3) return '';
+    // 미러 X 좌표
     const mlwx=(1-lw.x)*W, mrwx=(1-rw.x)*W;
-    const bothUp=lw.y<(ls?ls.y:1)-0.05&&rw.y<(rs?rs.y:1)-0.05;
-    if(Math.abs(mlwx-mrwx)<150&&bothUp) return 'O';
-    if(mlwx>mrwx&&Math.abs(mlwx-mrwx)>100&&Math.abs(lw.y-rw.y)<0.2) return 'X';
+    const mlsx=(1-ls.x)*W, mrsx=(1-rs.x)*W;
+    const noseY=nose.y*H;
+
+    // O: 양 손목이 코보다 위 + 양 손목 간격 200px 이내
+    const lwAboveNose = lw.y*H < noseY;
+    const rwAboveNose = rw.y*H < noseY;
+    const wristDist = Math.abs(mlwx - mrwx);
+    if (lwAboveNose && rwAboveNose && wristDist < 200) return 'O';
+
+    // X: 왼손목이 오른어깨보다 오른쪽 + 오른손목이 왼어깨보다 왼쪽 (팔짱)
+    const lwCrossed = mlwx > mrsx; // 미러 왼손목이 미러 오른어깨보다 오른쪽
+    const rwCrossed = mrwx < mlsx; // 미러 오른손목이 미러 왼어깨보다 왼쪽
+    if (lwCrossed && rwCrossed) return 'X';
+
     return '';
   }
 
   if(el.result){
     el.result.style.display='flex';
-    el.result.innerHTML='🎮 <b>O:</b> 양팔 머리 위로 모으기 &nbsp;|&nbsp; <b>X:</b> 팔 교차해서 X자 만들기';
+    el.result.innerHTML='🎮 <b>O:</b> 양손 머리 위로 동그랗게 &nbsp;|&nbsp; <b>X:</b> 팔짱 교차하기';
   }
 
   const loop=()=>{
@@ -1700,20 +1714,37 @@ async function runPose(num, el) {
           const pose=detectOX(lm);
           if(pose&&pose===holdPose) holdCount++;
           else{holdPose=pose; holdCount=pose?1:0;}
-          if(holdCount>12&&resultMsg===''){
+          if(holdCount>20&&resultMsg===''){
             const q=QS[qIdx%QS.length];
             const correct=(pose==='O')===q.ans;
             resultMsg=correct?'✅ 정답!':'❌ 오답!';
             setTimeout(()=>{qIdx++;resultMsg='';holdCount=0;holdPose='';},2500);
           }
+          // 실시간 인식 상태 크게 표시
           if(holdPose){
-            const pct=Math.min(holdCount/12,1);
-            ctx.fillStyle='rgba(0,0,0,0.6)'; ctx.fillRect(W/2-120,H-50,240,26);
-            ctx.fillStyle=holdPose==='O'?'#4ade80':'#f87171';
-            ctx.fillRect(W/2-120,H-50,240*pct,26);
-            ctx.font='bold 40px sans-serif'; ctx.textAlign='center';
-            ctx.fillStyle=holdPose==='O'?'#4ade80':'#f87171';
-            ctx.fillText(holdPose,W/2,H-62);
+            const pct=Math.min(holdCount/20,1);
+            const poseCol=holdPose==='O'?'#4ade80':'#f87171';
+            // 화면 중앙에 현재 포즈 크게
+            ctx.globalAlpha=0.85;
+            ctx.font='bold 120px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+            ctx.fillStyle=poseCol;
+            ctx.fillText(holdPose==='O'?'⭕':'❌', W/2, H/2);
+            ctx.globalAlpha=1;
+            // 프로그레스 바
+            const barW=300, barH=20, barX=W/2-barW/2, barY=H/2+80;
+            ctx.fillStyle='rgba(0,0,0,0.5)'; ctx.fillRect(barX,barY,barW,barH);
+            ctx.fillStyle=poseCol; ctx.fillRect(barX,barY,barW*pct,barH);
+            ctx.strokeStyle='rgba(255,255,255,0.3)'; ctx.lineWidth=2; ctx.strokeRect(barX,barY,barW,barH);
+            // 퍼센트 텍스트
+            ctx.font='bold 24px sans-serif'; ctx.fillStyle='#fff';
+            ctx.fillText(`${Math.round(pct*100)}%`, W/2, barY+barH+28);
+          } else {
+            // 포즈 없을 때 안내
+            ctx.globalAlpha=0.5;
+            ctx.font='bold 36px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+            ctx.fillStyle='#fff';
+            ctx.fillText('포즈를 취해주세요!', W/2, H/2);
+            ctx.globalAlpha=1;
           }
         }
       }catch(e){}
@@ -1731,7 +1762,7 @@ async function runPose(num, el) {
     ctx.fillStyle='rgba(0,0,0,0.85)'; ctx.fillRect(0,H-54,W,54);
     ctx.font='bold 22px sans-serif'; ctx.textAlign='center';
     ctx.fillStyle='rgba(255,255,255,0.85)';
-    ctx.fillText('⭕ O: 양팔 머리 위로 모으기   |   ❌ X: 팔 교차해서 X자 만들기',W/2,H-18);
+    ctx.fillText('⭕ O: 양손 머리 위로 동그랗게   |   ❌ X: 팔짱 교차하기',W/2,H-18);
     if(resultMsg){
       ctx.fillStyle=resultMsg.includes('정답')?'rgba(74,222,128,0.93)':'rgba(248,113,113,0.93)';
       ctx.fillRect(W/2-160,H/2-60,320,100);
