@@ -922,6 +922,39 @@ SESSIONS.forEach((sess, idx) => {
           </div>
         </div>
       </div>
+      ${sess.num===7 ? `
+      <div style="border-radius:12px;overflow:hidden;border:1px solid rgba(10,123,107,0.3);">
+        <div style="background:rgba(10,123,107,0.25);padding:12px 16px;font-size:15px;font-weight:700;color:var(--white);display:flex;align-items:center;justify-content:space-between;">
+          <span>📋 팀 프로젝트 기획안 양식 예시</span>
+          <button onclick="(function(){var w=window.open('','','width=800,height=900');var el=document.getElementById('planForm7');w.document.write('<html><head><title>기획안 양식</title><style>body{font-family:sans-serif;padding:40px;color:#222;}h2{text-align:center;margin-bottom:24px;}.field{margin-bottom:20px;}.label{font-weight:700;font-size:15px;margin-bottom:6px;}.hint{color:#888;font-size:13px;font-style:italic;}.line{border-bottom:1.5px solid #ccc;height:28px;margin:4px 0;}</style></head><body>'+el.innerHTML+'</body></html>');w.document.close();w.print();})()" style="background:var(--teal);color:#fff;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">🖨️ 인쇄</button>
+        </div>
+        <div id="planForm7" style="background:#fff;padding:20px 22px;color:#222;">
+          <div style="text-align:center;font-size:20px;font-weight:900;color:#0A7B6B;margin-bottom:4px;">AI 활용 프로젝트 기획안</div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:16px;padding-bottom:10px;border-bottom:2px solid #0A7B6B;">
+            <span style="font-size:14px;">팀 이름: _______________</span>
+            <span style="font-size:14px;">날짜: ___________</span>
+          </div>
+          ${[
+            {num:'①',title:'우리가 해결하고 싶은 문제',hint:'예시) 학교 급식 잔반이 너무 많아요'},
+            {num:'②',title:'이 문제에 AI를 어떻게 활용할까요?',hint:'예시) 카메라로 잔반량을 인식해서 인기 메뉴를 자동으로 파악'},
+            {num:'③',title:'우리 팀의 AI 활용 아이디어',hint:'예시) YOLO 사물인식으로 잔반 종류 감지 → 메뉴 추천 AI'},
+            {num:'④',title:'예상 결과물 (무엇을 만들건지)',hint:'예시) 잔반 줄이기 캠페인 포스터 + 아이디어 발표 자료'},
+          ].map(f=>`
+          <div style="margin-bottom:14px;">
+            <div style="font-size:15px;font-weight:700;color:#0A7B6B;margin-bottom:2px;">${f.num} ${f.title}</div>
+            <div style="font-size:12px;color:#999;font-style:italic;margin-bottom:4px;">${f.hint}</div>
+            <div style="border-bottom:1.5px solid #ddd;height:24px;"></div>
+            <div style="border-bottom:1.5px solid #ddd;height:24px;"></div>
+          </div>`).join('')}
+          <div style="margin-bottom:8px;">
+            <div style="font-size:15px;font-weight:700;color:#0A7B6B;margin-bottom:6px;">⑤ 팀원 역할 분담</div>
+            <div style="font-size:14px;color:#555;padding:8px 0;border-bottom:1.5px solid #ddd;">기획: ___________ &nbsp;/&nbsp; 제작: ___________ &nbsp;/&nbsp; 발표: ___________</div>
+          </div>
+        </div>
+        <div style="background:rgba(255,255,255,0.05);padding:10px 16px;text-align:center;">
+          <div style="font-size:12px;color:rgba(255,255,255,0.45);line-height:1.5;">이 양식을 인쇄해서 팀별로 나눠주세요 — 준비 5분이면 끝!</div>
+        </div>
+      </div>` : ''}
     </div>` : `
     <div class="session-demo-panel" style="justify-content:center;align-items:center;">
       <div style="text-align:center;padding:20px;">
