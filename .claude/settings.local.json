@@ -5,7 +5,15 @@
       "Bash(cp:*)",
       "Bash(cd:*)",
       "Bash(git init:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(gh repo:*)",
+      "Bash(gh api:*)",
+      "Bash(git push:*)",
+      "Bash(gh run:*)",
+      "Bash(git -C C:/aiproject add .)",
+      "Bash(git -C:*)",
+      "Bash(git -C C:/aiproject push)"
     ]
   }
 }

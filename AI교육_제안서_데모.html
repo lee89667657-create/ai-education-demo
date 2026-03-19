@@ -207,17 +207,17 @@ section { min-height:100vh; padding:80px 0 60px; }
 }
 
 .session-body { display:grid; grid-template-columns:1fr 2fr; gap:0; }
-.session-flow { padding:20px 24px; }
-.flow-title { font-size:11px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:rgba(255,255,255,0.3); margin-bottom:12px; }
-.flow-row { display:grid; grid-template-columns:72px 64px 1fr; gap:0; margin-bottom:3px; }
-.flow-row:last-child { margin-bottom:0; }
-.flow-cell { padding:10px 12px; font-size:11.5px; border:1px solid rgba(255,255,255,0.06); border-right:none; background:rgba(255,255,255,0.02); }
+.session-flow { padding:20px 24px; display:flex; flex-direction:column; justify-content:space-between; height:100%; }
+.flow-title { font-size:12px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:rgba(255,255,255,0.3); margin-bottom:8px; flex-shrink:0; }
+.flow-rows { display:flex; flex-direction:column; justify-content:space-between; flex:1; gap:6px; }
+.flow-row { display:grid; grid-template-columns:88px 78px 1fr; gap:0; flex:1; }
+.flow-cell { padding:14px 14px; font-size:15px; border:1px solid rgba(255,255,255,0.06); border-right:none; background:rgba(255,255,255,0.02); display:flex; align-items:center; }
 .flow-cell:last-child { border-right:1px solid rgba(255,255,255,0.06); border-radius:0 8px 8px 0; }
-.flow-cell:first-child { border-radius:8px 0 0 8px; color:rgba(255,255,255,0.35); }
-.flow-who { font-weight:700; text-align:center; display:flex; align-items:center; justify-content:center; }
+.flow-cell:first-child { border-radius:8px 0 0 8px; color:rgba(255,255,255,0.4); font-size:15px; font-weight:500; }
+.flow-who { font-size:15px; font-weight:700; text-align:center; display:flex; align-items:center; justify-content:center; }
 .flow-who.teacher { color:var(--teal2); }
 .flow-who.student { color:var(--coral); }
-.flow-act { color:rgba(255,255,255,0.75); line-height:1.5; }
+.flow-act { font-size:16px; color:rgba(255,255,255,0.75); line-height:1.6; }
 
 .session-demo-panel {
   border-left:1px solid rgba(255,255,255,0.08);
@@ -909,7 +909,7 @@ SESSIONS.forEach((sess, idx) => {
     <div class="session-body">
       <div class="session-flow">
         <div class="flow-title">수업 흐름 (40분)</div>
-        ${flowRows}
+        <div class="flow-rows">${flowRows}</div>
       </div>
       ${demoPanel}
     </div>
@@ -1265,12 +1265,6 @@ async function runHands(num, el) {
         ctx.globalAlpha = 1;
       }
     });
-
-    // ── 안내 오버레이 ──
-    ctx.fillStyle='rgba(0,0,0,0.7)'; ctx.fillRect(0,H-42,W,42);
-    ctx.font='bold 18px sans-serif'; ctx.textAlign='center';
-    ctx.fillStyle='rgba(255,255,255,0.8)';
-    ctx.fillText('🤏 검지로 물건 잡기  →  ✋ 손 펴서 던지기  |  던진 횟수: '+grabCount, W/2, H-15);
 
     if(activeLoops[num]) requestAnimationFrame(loop);
   };
