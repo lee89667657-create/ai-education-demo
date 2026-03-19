@@ -1660,26 +1660,23 @@ async function runPose(num, el) {
   ];
   let qIdx=0,resultMsg='',holdPose='',holdCount=0,lastTime=-1;
 
+  let debugInfo = ''; // 디버그 좌표 표시용
   function detectOX(lm){
-    // 미러 좌표 기준 (화면에 보이는 대로)
-    const nose=lm[0], lw=lm[15], rw=lm[16], ls=lm[11], rs=lm[12];
-    if(!lw||!rw||!nose) return '';
-    if((lw.visibility||0)<0.3||(rw.visibility||0)<0.3) return '';
-    // 미러 X 좌표
-    const mlwx=(1-lw.x)*W, mrwx=(1-rw.x)*W;
+    const lw=lm[15], rw=lm[16], ls=lm[11], rs=lm[12];
+    if(!lw||!rw||!ls||!rs) { debugInfo='손목/어깨 미감지'; return ''; }
+    // 미러 좌표
+    const mlwx=(1-lw.x)*W, mlwy=lw.y*H;
+    const mrwx=(1-rw.x)*W, mrwy=rw.y*H;
+    const mlsy=ls.y*H, mrsy=rs.y*H;
     const mlsx=(1-ls.x)*W, mrsx=(1-rs.x)*W;
-    const noseY=nose.y*H;
 
-    // O: 양 손목이 코보다 위 + 양 손목 간격 200px 이내
-    const lwAboveNose = lw.y*H < noseY;
-    const rwAboveNose = rw.y*H < noseY;
-    const wristDist = Math.abs(mlwx - mrwx);
-    if (lwAboveNose && rwAboveNose && wristDist < 200) return 'O';
+    debugInfo = `L손목(${Math.round(mlwx)},${Math.round(mlwy)}) R손목(${Math.round(mrwx)},${Math.round(mrwy)}) L어깨y=${Math.round(mlsy)} R어깨y=${Math.round(mrsy)}`;
 
-    // X: 왼손목이 오른어깨보다 오른쪽 + 오른손목이 왼어깨보다 왼쪽 (팔짱)
-    const lwCrossed = mlwx > mrsx; // 미러 왼손목이 미러 오른어깨보다 오른쪽
-    const rwCrossed = mrwx < mlsx; // 미러 오른손목이 미러 왼어깨보다 왼쪽
-    if (lwCrossed && rwCrossed) return 'X';
+    // O: 양 손목이 어깨보다 위
+    if (mlwy < mlsy && mrwy < mrsy) return 'O';
+
+    // X: 양 손목이 어깨보다 아래 + 교차 (왼손목X > 오른손목X)
+    if (mlwy >= mlsy && mrwy >= mrsy && mlwx > mrwx) return 'X';
 
     return '';
   }
@@ -1714,15 +1711,21 @@ async function runPose(num, el) {
           const pose=detectOX(lm);
           if(pose&&pose===holdPose) holdCount++;
           else{holdPose=pose; holdCount=pose?1:0;}
-          if(holdCount>20&&resultMsg===''){
+          if(holdCount>8&&resultMsg===''){
             const q=QS[qIdx%QS.length];
             const correct=(pose==='O')===q.ans;
             resultMsg=correct?'✅ 정답!':'❌ 오답!';
             setTimeout(()=>{qIdx++;resultMsg='';holdCount=0;holdPose='';},2500);
           }
+          // 디버그 좌표 표시 (좌측 하단)
+          ctx.font='13px monospace'; ctx.textAlign='left'; ctx.textBaseline='bottom';
+          ctx.fillStyle='rgba(0,0,0,0.6)'; ctx.fillRect(4,H-108,480,44);
+          ctx.fillStyle='#0f0';
+          ctx.fillText(`[DEBUG] ${debugInfo}`, 8, H-90);
+          ctx.fillText(`pose=${pose||'none'} hold=${holdCount}/8 cur=${holdPose||'none'}`, 8, H-72);
           // 실시간 인식 상태 크게 표시
           if(holdPose){
-            const pct=Math.min(holdCount/20,1);
+            const pct=Math.min(holdCount/8,1);
             const poseCol=holdPose==='O'?'#4ade80':'#f87171';
             // 화면 중앙에 현재 포즈 크게
             ctx.globalAlpha=0.85;
