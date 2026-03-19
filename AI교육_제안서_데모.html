@@ -606,17 +606,17 @@ const SESSIONS = [
     demoDesc:"카메라를 주변 사물에 향해보세요 — AI가 실시간으로 사물을 인식합니다 (TensorFlow.js 기반)",
   },
   {
-    num:5, phase:"윤리 선언", phaseClass:"ethics", tool:"1–4차시 체험 총복습",
-    title:"AI는 왜 틀릴까? — 나만의 AI 원칙 선언",
-    goal:"체험에서 발견한 오류·편향을 바탕으로 '나만의 AI 윤리 선언문' 직접 작성",
+    num:5, phase:"윤리 선언", phaseClass:"ethics", tool:"딜레마 토론 + 선언문 작성",
+    title:"AI, 어떻게 써야 할까? — 딜레마 토론 + 나만의 선언문",
+    goal:"실제 AI 사건 기반 딜레마 토론 후 '나만의 AI 윤리 선언문' 직접 작성",
     flow:[
-      {time:"0–8분", who:"teacher", whoLabel:"선생님", act:"1–4차시 오인식 사례 함께 돌아보기 + '왜 이런 일이 생길까?' 질문"},
-      {time:"8–20분", who:"student", whoLabel:"아이들", act:"팀별 토론 — AI가 틀리는 이유 3가지 찾기 (편견·데이터·설계)"},
-      {time:"20–35분", who:"student", whoLabel:"아이들", act:"'나는 AI를 이렇게 쓸 거야' — 나만의 AI 원칙 5가지 직접 작성"},
-      {time:"35–40분", who:"student", whoLabel:"아이들", act:"팀별 선언문 발표 + 교실 벽에 게시"},
+      {time:"0–5분", who:"teacher", whoLabel:"선생님", act:"'오늘은 AI가 내린 결정이 옳은지 직접 판단해볼 거예요' 한마디"},
+      {time:"5–25분", who:"student", whoLabel:"아이들", act:"AI 딜레마 카드 4개 팀별 토론"},
+      {time:"25–38분", who:"student", whoLabel:"아이들", act:"나만의 AI 윤리 선언문 5가지 직접 작성"},
+      {time:"38–40분", who:"student", whoLabel:"아이들", act:"팀별 선언문 발표 + 교실 벽에 게시"},
     ],
     result:"나만의 AI 윤리 선언문 (A4 1장) — 학교 전시·학부모 공개 가능",
-    tip:"선언문을 교실 벽에 붙여두면 이후 수업 내내 기준점이 돼요. 학교장·학부모에게도 인상적.",
+    tip:"딜레마 토론에서 정답은 없어요. 아이들끼리 부딪히는 의견이 나올수록 좋은 수업이에요.",
     portfolio:"AI 윤리 선언문 → 포트폴리오 핵심 페이지 (학교 어필 최강)",
     demoType:"ethics",
     demoDesc:null,
@@ -840,6 +840,41 @@ SESSIONS.forEach((sess, idx) => {
           ⏹ 체험 중단
         </button>
       </div>
+    </div>` : isEthics ? `
+    <div class="session-demo-panel" style="padding:16px;gap:10px;overflow-y:auto;">
+      <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--purple);margin-bottom:4px;">AI 딜레마 카드 — 클릭해서 펼치기</div>
+      ${[
+        {icon:'🚗',title:'자율주행 딜레마',desc:'브레이크 고장 난 테슬라, AI는 누구를 살려야 하나?',detail:'직진 = 보행자 5명 사망 &nbsp;/&nbsp; 핸들 = 탑승자 1명 사망',question:'이 선택의 책임은 누가 지나요?'},
+        {icon:'🤖',title:'챗봇 이루다 사건',desc:'AI가 차별 발언을 배웠어요. 누구 잘못인가요?',detail:'AI인가? 만든 회사인가? 데이터 올린 사람들인가?',question:'AI의 잘못된 행동, 누가 책임져야 하나요?'},
+        {icon:'💼',title:'채용 AI 편향',desc:'AI가 여성 지원자에게 낮은 점수를 줬어요',detail:'과거 합격자 대부분이 남성 → AI가 그대로 학습',question:'공정하지 않은 AI, 어떻게 고쳐야 하나요?'},
+        {icon:'📹',title:'AI 감시 카메라',desc:'범죄 예방 vs 개인 프라이버시',detail:'AI 얼굴인식 CCTV = 범인 잘 잡음 BUT 모든 시민 감시',question:'안전과 자유, 어느 게 더 중요한가요?'},
+      ].map((d,i)=>`
+        <details style="background:rgba(91,78,142,0.12);border:1px solid rgba(91,78,142,0.25);border-radius:12px;overflow:hidden;">
+          <summary style="padding:12px 16px;cursor:pointer;font-size:15px;font-weight:700;color:var(--white);list-style:none;display:flex;align-items:center;gap:10px;">
+            <span style="font-size:22px;">${d.icon}</span>
+            <span style="flex:1;">${d.title}</span>
+            <span style="font-size:11px;color:rgba(255,255,255,0.35);">펼치기 ▾</span>
+          </summary>
+          <div style="padding:0 16px 14px;border-top:1px solid rgba(91,78,142,0.2);">
+            <p style="font-size:14px;color:rgba(255,255,255,0.85);margin:12px 0 8px;font-weight:600;line-height:1.5;">"${d.desc}"</p>
+            <p style="font-size:13px;color:rgba(255,255,255,0.55);margin-bottom:10px;line-height:1.5;">${d.detail}</p>
+            <div style="background:rgba(232,97,58,0.15);border-left:3px solid var(--coral);border-radius:0 8px 8px 0;padding:10px 14px;">
+              <div style="font-size:10px;font-weight:700;color:var(--coral);letter-spacing:.06em;margin-bottom:4px;">토론 질문</div>
+              <div style="font-size:14px;color:rgba(255,255,255,0.9);font-weight:600;">"${d.question}"</div>
+            </div>
+          </div>
+        </details>`).join('')}
+      <div style="background:rgba(255,255,255,0.05);border-radius:10px;padding:14px 16px;margin-top:4px;">
+        <div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-bottom:10px;">전문가 한마디</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.65);line-height:1.7;margin-bottom:6px;"><b style="color:var(--mint);">스티븐 호킹 · 일론 머스크</b> — "AI 개발할 때 인간의 가치를 반드시 가르쳐야 한다" <span style="opacity:0.5">(2017 아실로마 원칙)</span></div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.65);line-height:1.7;margin-bottom:6px;"><b style="color:var(--mint);">유네스코 193개국</b> — "AI는 인간 존엄성·공정성·투명성을 지켜야 한다" <span style="opacity:0.5">(2021)</span></div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.65);line-height:1.7;"><b style="color:var(--mint);">닉 보스트롬</b> — "인간이 소중히 여기는 가치를 기계에 가르치는 방법을 준비해야 한다"</div>
+      </div>
+      <div style="background:rgba(91,78,142,0.2);border:1px dashed rgba(91,78,142,0.5);border-radius:10px;padding:14px 16px;text-align:center;">
+        <div style="font-size:22px;margin-bottom:6px;">✍️</div>
+        <div style="font-size:14px;font-weight:700;color:var(--white);margin-bottom:4px;">나만의 AI 원칙 5가지를 적어보세요</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.5);line-height:1.5;">오늘 토론을 바탕으로 작성 → 완성하면 교실 벽에 붙입니다!</div>
+      </div>
     </div>` : guide ? `
     <div class="session-demo-panel" style="padding:20px;gap:12px;overflow-y:auto;">
       <div style="background:rgba(255,255,255,0.05);border-radius:12px;padding:14px 16px;border-left:3px solid ${guide.color};">
@@ -881,17 +916,7 @@ SESSIONS.forEach((sess, idx) => {
       </div>
     </div>`;
 
-  const ethicsExtra = isEthics ? `
-    <div class="ethics-card">
-      <h4>✍️ 나만의 AI 윤리 선언문 — 작성 예시</h4>
-      <div class="ethics-items">
-        <div class="ethics-item"><div class="ethics-num">1</div><p>나는 AI의 답을 그대로 믿지 않고 항상 직접 확인하겠습니다</p></div>
-        <div class="ethics-item"><div class="ethics-num">2</div><p>나는 AI가 만든 것을 내 것인 척 하지 않겠습니다</p></div>
-        <div class="ethics-item"><div class="ethics-num">3</div><p>나는 AI의 판단이 편향될 수 있다는 것을 기억하겠습니다</p></div>
-        <div class="ethics-item"><div class="ethics-num">4</div><p>나는 AI를 도구로 쓰되, 최종 결정은 내가 하겠습니다</p></div>
-        <div class="ethics-item"><div class="ethics-num">5</div><p>나는 AI로 다른 사람에게 피해를 주지 않겠습니다</p></div>
-      </div>
-    </div>` : '';
+  const ethicsExtra = '';
 
   const card = document.createElement('div');
   card.className = 'session-card' + (idx===0?' active':'');
