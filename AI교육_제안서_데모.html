@@ -1491,151 +1491,43 @@ async function runFace(num, el) {
   const OVAL=[10,338,297,332,284,251,389,356,454,323,361,288,397,365,379,378,400,377,152,148,176,149,150,136,172,58,132,93,234,127,162,21,54,103,67,109];
   let lastTime=-1;
 
-  // ── SVG 캐릭터 얼굴 그리기 함수 ──
-  function drawCharFace(cx, cy, r, expr) {
-    // expr: {type, col, label, smile, jaw, blink}
-    const s = r / 100; // 스케일 팩터
+  // ── 표정별 이미지 프리로드 ──
+  const FACE_IMAGES = {};
+  const IMG_MAP = {
+    neutral:  '무표정.jpeg',
+    smile:    '웃는표정.jpeg',
+    bigsmile: '크게 웃는 표정.jpeg',
+    surprise: '놀란표정.jpeg',
+    angry:    '화난표정.jpeg',
+    blink:    '눈감음.jpeg',
+  };
+  let imagesLoaded = 0;
+  const totalImages = Object.keys(IMG_MAP).length;
+  Object.entries(IMG_MAP).forEach(([key, file]) => {
+    const img = new Image();
+    img.onload = () => { imagesLoaded++; };
+    img.onerror = () => { console.warn('이미지 로드 실패:', file); imagesLoaded++; };
+    img.src = encodeURI(file);
+    FACE_IMAGES[key] = img;
+  });
 
-    // 얼굴 원 — 부드러운 그라데이션
-    const faceGrad = ctx.createRadialGradient(cx-r*0.2, cy-r*0.2, r*0.1, cx, cy, r);
-    faceGrad.addColorStop(0, '#ffe8a3');
-    faceGrad.addColorStop(1, '#ffd166');
-    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2);
-    ctx.fillStyle = faceGrad; ctx.fill();
-    ctx.strokeStyle = '#e6b84d'; ctx.lineWidth = 3*s; ctx.stroke();
-
-    // 볼 터치 (웃을 때 더 진하게)
-    const cheekAlpha = expr.type === 'bigsmile' || expr.type === 'smile' ? 0.45 : 0.2;
-    ctx.fillStyle = `rgba(255,130,100,${cheekAlpha})`;
-    ctx.beginPath(); ctx.ellipse(cx - 58*s, cy + 18*s, 22*s, 16*s, 0, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(cx + 58*s, cy + 18*s, 22*s, 16*s, 0, 0, Math.PI*2); ctx.fill();
-
-    // ── 눈 ──
-    const eyeY = cy - 18*s;
-    const eyeLx = cx - 32*s, eyeRx = cx + 32*s;
-
-    if (expr.type === 'blink') {
-      // 눈 감음 — 가로 선
-      ctx.strokeStyle = '#4a3728'; ctx.lineWidth = 4*s; ctx.lineCap = 'round';
-      [-1,1].forEach(side => {
-        const ex = side < 0 ? eyeLx : eyeRx;
-        ctx.beginPath(); ctx.moveTo(ex-14*s, eyeY); ctx.lineTo(ex+14*s, eyeY); ctx.stroke();
-      });
-      // Zzz
-      ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.font = `bold ${28*s}px sans-serif`;
-      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText('z z Z', cx + 60*s, cy - 65*s);
-    } else if (expr.type === 'angry') {
-      // 화남 — 찡그린 눈 (^ 모양 눈썹 + 작은 눈)
-      ctx.fillStyle = '#4a3728';
-      [-1,1].forEach(side => {
-        const ex = side < 0 ? eyeLx : eyeRx;
-        ctx.beginPath(); ctx.ellipse(ex, eyeY+4*s, 10*s, 9*s, 0, 0, Math.PI*2); ctx.fill();
-        // 찡그린 눈썹
-        ctx.strokeStyle = '#4a3728'; ctx.lineWidth = 5*s; ctx.lineCap = 'round';
-        ctx.beginPath();
-        ctx.moveTo(ex - side*18*s, eyeY - 24*s);
-        ctx.lineTo(ex + side*8*s, eyeY - 16*s);
-        ctx.stroke();
-      });
-    } else if (expr.type === 'surprise') {
-      // 놀람 — 크게 뜬 동그란 눈
-      [-1,1].forEach(side => {
-        const ex = side < 0 ? eyeLx : eyeRx;
-        ctx.fillStyle = '#fff';
-        ctx.beginPath(); ctx.arc(ex, eyeY, 18*s, 0, Math.PI*2); ctx.fill();
-        ctx.strokeStyle = '#4a3728'; ctx.lineWidth = 3*s; ctx.stroke();
-        ctx.fillStyle = '#4a3728';
-        ctx.beginPath(); ctx.arc(ex, eyeY+2*s, 9*s, 0, Math.PI*2); ctx.fill();
-        // 하이라이트
-        ctx.fillStyle = '#fff';
-        ctx.beginPath(); ctx.arc(ex-4*s, eyeY-4*s, 4*s, 0, Math.PI*2); ctx.fill();
-        // 올라간 눈썹
-        ctx.strokeStyle = '#4a3728'; ctx.lineWidth = 4*s; ctx.lineCap = 'round';
-        ctx.beginPath();
-        ctx.moveTo(ex-14*s, eyeY-28*s); ctx.quadraticCurveTo(ex, eyeY-38*s, ex+14*s, eyeY-28*s);
-        ctx.stroke();
-      });
-    } else {
-      // 기본/웃음/크게웃음 — 동그란 눈
-      const eyeSquint = (expr.type === 'bigsmile') ? 0.6 : 1;
-      [-1,1].forEach(side => {
-        const ex = side < 0 ? eyeLx : eyeRx;
-        if (expr.type === 'bigsmile') {
-          // 크게 웃음 — 눈웃음 (아치)
-          ctx.strokeStyle = '#4a3728'; ctx.lineWidth = 4*s; ctx.lineCap = 'round';
-          ctx.beginPath();
-          ctx.arc(ex, eyeY+6*s, 13*s, Math.PI*1.15, Math.PI*1.85);
-          ctx.stroke();
-        } else {
-          ctx.fillStyle = '#fff';
-          ctx.beginPath(); ctx.arc(ex, eyeY, 14*s, 0, Math.PI*2); ctx.fill();
-          ctx.strokeStyle = '#4a3728'; ctx.lineWidth = 2*s; ctx.stroke();
-          ctx.fillStyle = '#4a3728';
-          ctx.beginPath(); ctx.arc(ex, eyeY+2*s, 7*s, 0, Math.PI*2); ctx.fill();
-          ctx.fillStyle = '#fff';
-          ctx.beginPath(); ctx.arc(ex-3*s, eyeY-2*s, 3*s, 0, Math.PI*2); ctx.fill();
-        }
-      });
-    }
-
-    // ── 입 ──
-    const mouthY = cy + 36*s;
-    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-
-    if (expr.type === 'bigsmile') {
-      // 크게 웃음 — 활짝 벌린 입
-      ctx.beginPath();
-      ctx.moveTo(cx-34*s, mouthY-6*s);
-      ctx.quadraticCurveTo(cx, mouthY+36*s, cx+34*s, mouthY-6*s);
-      ctx.closePath();
-      ctx.fillStyle = '#c0392b'; ctx.fill();
-      ctx.strokeStyle = '#4a3728'; ctx.lineWidth = 3*s; ctx.stroke();
-      // 혀
-      ctx.beginPath();
-      ctx.ellipse(cx, mouthY+14*s, 14*s, 10*s, 0, 0, Math.PI);
-      ctx.fillStyle = '#e74c6f'; ctx.fill();
-    } else if (expr.type === 'smile') {
-      // 웃음 — 부드러운 미소
-      ctx.beginPath();
-      ctx.moveTo(cx-28*s, mouthY);
-      ctx.quadraticCurveTo(cx, mouthY+24*s, cx+28*s, mouthY);
-      ctx.strokeStyle = '#4a3728'; ctx.lineWidth = 4*s; ctx.stroke();
-    } else if (expr.type === 'surprise') {
-      // 놀람 — 동그란 입
-      ctx.beginPath(); ctx.ellipse(cx, mouthY+6*s, 18*s, 24*s, 0, 0, Math.PI*2);
-      ctx.fillStyle = '#c0392b'; ctx.fill();
-      ctx.strokeStyle = '#4a3728'; ctx.lineWidth = 3*s; ctx.stroke();
-    } else if (expr.type === 'angry') {
-      // 화남 — 아래로 내려간 입
-      ctx.beginPath();
-      ctx.moveTo(cx-24*s, mouthY+8*s);
-      ctx.quadraticCurveTo(cx, mouthY-12*s, cx+24*s, mouthY+8*s);
-      ctx.strokeStyle = '#4a3728'; ctx.lineWidth = 4*s; ctx.stroke();
-    } else if (expr.type === 'blink') {
-      // 눈 감음 — 살짝 미소
-      ctx.beginPath();
-      ctx.moveTo(cx-20*s, mouthY+2*s);
-      ctx.quadraticCurveTo(cx, mouthY+14*s, cx+20*s, mouthY+2*s);
-      ctx.strokeStyle = '#4a3728'; ctx.lineWidth = 3*s; ctx.stroke();
-    } else {
-      // 무표정 — 일자 입
-      ctx.beginPath();
-      ctx.moveTo(cx-22*s, mouthY+4*s);
-      ctx.lineTo(cx+22*s, mouthY+4*s);
-      ctx.strokeStyle = '#4a3728'; ctx.lineWidth = 4*s; ctx.stroke();
-    }
-  }
+  // 페이드 전환 상태
+  let currentExpr = 'neutral';
+  let fadeAlpha = 1;      // 현재 이미지 불투명도
+  let fadeTarget = '';     // 전환 대상
+  let fadeStartT = 0;
+  const FADE_DUR = 200;   // ms
 
   const loop=()=>{
     if(!activeLoops[num]||!activeStreams[num]) return;
+    const now = performance.now();
+
     // 왼쪽: 미러 카메라
     ctx.save(); ctx.translate(HW,0); ctx.scale(-1,1);
     ctx.drawImage(el.video,0,0,HW,H); ctx.restore();
-    // 오른쪽: 캐릭터 패널 (진한 배경)
-    ctx.fillStyle='#0D2E3A'; ctx.fillRect(HW,0,HW,H);
+    // 오른쪽: 흰색 패널
+    ctx.fillStyle='#ffffff'; ctx.fillRect(HW,0,HW,H);
 
-    const now=performance.now();
     if(now!==lastTime){
       lastTime=now;
       try{
@@ -1657,16 +1549,15 @@ async function runFace(num, el) {
 
           // 표정 분석 (blendshapes) — 낮춘 임계값
           let exprType='neutral',label='무표정',col='#94a3b8';
-          let smile=0, jaw=0, blink=0;
           if(result.faceBlendshapes&&result.faceBlendshapes[0]){
             const bs={};
             result.faceBlendshapes[0].categories.forEach(c=>{bs[c.categoryName]=c.score;});
-            jaw=bs['jawOpen']||0;
+            const jaw=bs['jawOpen']||0;
             const smL=bs['mouthSmileLeft']||0, smR=bs['mouthSmileRight']||0;
             const blinkL=bs['eyeBlinkLeft']||0, blinkR=bs['eyeBlinkRight']||0;
             const browD=bs['browDownLeft']||0;
-            smile=(smL+smR)/2;
-            blink=(blinkL+blinkR)/2;
+            const smile=(smL+smR)/2;
+            const blink=(blinkL+blinkR)/2;
             if(blink>0.45){exprType='blink';label='눈 감음';col='#94a3b8';}
             else if(jaw>0.55){exprType='surprise';label='놀람!';col='#fbbf24';}
             else if(smile>0.4&&jaw>0.15){exprType='bigsmile';label='크게 웃는 중!';col='#4ade80';}
@@ -1674,42 +1565,93 @@ async function runFace(num, el) {
             else if(browD>0.25){exprType='angry';label='화난 표정';col='#f87171';}
           }
 
-          // 오른쪽 캐릭터 패널
-          const cx=HW+HW/2, cy=H/2-30;
-          // 배경 서클 장식
-          ctx.beginPath(); ctx.arc(cx,cy,190,0,Math.PI*2);
-          ctx.fillStyle='rgba(255,255,255,0.04)'; ctx.fill();
-          ctx.beginPath(); ctx.arc(cx,cy,155,0,Math.PI*2);
-          ctx.fillStyle='rgba(255,255,255,0.04)'; ctx.fill();
+          // 페이드 전환 트리거
+          if (exprType !== currentExpr && exprType !== fadeTarget) {
+            fadeTarget = exprType;
+            fadeStartT = now;
+          }
 
-          // SVG 스타일 캐릭터 얼굴 그리기
-          drawCharFace(cx, cy, 120, {type:exprType, col, label, smile, jaw, blink});
+          // 페이드 전환 진행
+          if (fadeTarget) {
+            const progress = Math.min((now - fadeStartT) / FADE_DUR, 1);
+            fadeAlpha = 1 - progress;
+            if (progress >= 1) {
+              currentExpr = fadeTarget;
+              fadeTarget = '';
+              fadeAlpha = 1;
+            }
+          }
 
-          // 라벨
-          ctx.fillStyle=col+'55';
-          const lblY=cy+160;
-          ctx.fillRect(HW+40, lblY, HW-80, 58);
-          ctx.fillStyle=col; ctx.font='bold 32px sans-serif';
-          ctx.textAlign='center'; ctx.textBaseline='middle';
-          ctx.fillText(label, cx, lblY+29);
-          // 안내
-          ctx.fillStyle='rgba(255,255,255,0.45)'; ctx.font='bold 18px sans-serif';
-          ctx.fillText('다양한 표정을 지어보세요!', cx, H-20);
+          // ── 오른쪽 패널에 이미지 그리기 ──
+          const panelX = HW, panelW = HW, panelH = H;
+          const labelH = 70; // 하단 라벨 영역
+          const imgAreaH = panelH - labelH;
 
-          // 표정 아이콘 매핑 (결과바용)
-          const emojiMap={neutral:'😐',smile:'😊',bigsmile:'😄',surprise:'😲',angry:'😠',blink:'😴'};
-          const emoji=emojiMap[exprType]||'😐';
+          // 현재 이미지 그리기 (페이드 아웃)
+          const drawFaceImg = (key, alpha) => {
+            const img = FACE_IMAGES[key];
+            if (!img || !img.complete || !img.naturalWidth) return;
+            ctx.globalAlpha = alpha;
+            // 이미지를 패널에 최대한 크게 (비율 유지)
+            const imgRatio = img.naturalWidth / img.naturalHeight;
+            const areaRatio = panelW / imgAreaH;
+            let dw, dh;
+            if (imgRatio > areaRatio) {
+              dw = panelW; dh = panelW / imgRatio;
+            } else {
+              dh = imgAreaH; dw = imgAreaH * imgRatio;
+            }
+            const dx = panelX + (panelW - dw) / 2;
+            const dy = (imgAreaH - dh) / 2;
+            ctx.drawImage(img, dx, dy, dw, dh);
+            ctx.globalAlpha = 1;
+          };
+
+          // 전환 중: 새 이미지 먼저, 위에 현재 이미지 (페이드 아웃)
+          if (fadeTarget) {
+            drawFaceImg(fadeTarget, 1);
+            drawFaceImg(currentExpr, fadeAlpha);
+          } else {
+            drawFaceImg(currentExpr, 1);
+          }
+
+          // 하단 라벨 배경
+          const lblY = imgAreaH;
+          ctx.fillStyle = '#f8f8f8';
+          ctx.fillRect(panelX, lblY, panelW, labelH);
+          // 색깔 악센트 바
+          ctx.fillStyle = col;
+          ctx.fillRect(panelX, lblY, panelW, 4);
+          // 표정 이름
+          const emojiMap = {neutral:'😐',smile:'😊',bigsmile:'😄',surprise:'😲',angry:'😠',blink:'😴'};
+          const emoji = emojiMap[fadeTarget||currentExpr] || '😐';
+          ctx.font = 'bold 32px sans-serif';
+          ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+          ctx.fillStyle = col;
+          ctx.fillText(`${emoji}  ${label}`, panelX + panelW/2, lblY + labelH/2);
+
           el.info.textContent=`${emoji} 표정: ${label}`;
           if(el.result) el.result.innerHTML=`${emoji} <b style="color:${col}">${label}</b> — 다양한 표정을 지어보세요!`;
         } else {
-          // 얼굴 미감지 — 기본 캐릭터
-          const cx=HW+HW/2, cy=H/2-30;
-          ctx.beginPath(); ctx.arc(cx,cy,155,0,Math.PI*2);
-          ctx.fillStyle='rgba(255,255,255,0.04)'; ctx.fill();
-          drawCharFace(cx, cy, 120, {type:'neutral'});
-          ctx.fillStyle='rgba(255,255,255,0.4)'; ctx.font='bold 22px sans-serif';
+          // 얼굴 미감지 — 기본 이미지
+          const img = FACE_IMAGES['neutral'];
+          if (img && img.complete && img.naturalWidth) {
+            const panelX=HW, panelW=HW, imgAreaH=H-70;
+            const imgRatio = img.naturalWidth / img.naturalHeight;
+            const areaRatio = panelW / imgAreaH;
+            let dw, dh;
+            if (imgRatio > areaRatio) { dw=panelW; dh=panelW/imgRatio; }
+            else { dh=imgAreaH; dw=imgAreaH*imgRatio; }
+            const dx = panelX + (panelW-dw)/2, dy = (imgAreaH-dh)/2;
+            ctx.globalAlpha = 0.5;
+            ctx.drawImage(img, dx, dy, dw, dh);
+            ctx.globalAlpha = 1;
+          }
+          // 안내 텍스트
+          ctx.fillStyle='#f8f8f8'; ctx.fillRect(HW, H-70, HW, 70);
+          ctx.fillStyle='#999'; ctx.font='bold 24px sans-serif';
           ctx.textAlign='center'; ctx.textBaseline='middle';
-          ctx.fillText('얼굴을 카메라에 보여주세요', cx, cy+180);
+          ctx.fillText('😊  얼굴을 카메라에 보여주세요', HW+HW/2, H-35);
           el.info.textContent='😊 얼굴을 카메라 정면으로 보여주세요';
           if(el.result) el.result.innerHTML='얼굴을 카메라에 보여주세요';
         }

@@ -13,7 +13,8 @@
       "Bash(gh run:*)",
       "Bash(git -C C:/aiproject add .)",
       "Bash(git -C:*)",
-      "Bash(git -C C:/aiproject push)"
+      "Bash(git -C C:/aiproject push)",
+      "Bash(ls:*)"
     ]
   }
 }
