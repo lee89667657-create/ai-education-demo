@@ -748,6 +748,29 @@ SESSIONS.forEach((sess, idx) => {
       <div class="flow-cell flow-act">${f.act}</div>
     </div>`).join('');
 
+  // Timeline bar
+  const timelineBar = `
+    <div style="padding:12px 16px 14px;border-bottom:1px solid rgba(255,255,255,0.08);">
+      <div style="font-size:11px;font-weight:700;letter-spacing:.05em;color:rgba(255,255,255,0.45);margin-bottom:8px;">⏱ 40분 타임라인</div>
+      <div style="display:flex;width:100%;height:48px;border-radius:8px;box-sizing:border-box;overflow:visible;">
+        ${sess.timeline.map((t,i,a)=>{
+          const bg=t.who==='teacher'?'var(--teal)':'var(--coral)';
+          const isFirst=i===0;
+          const isLast=i===a.length-1;
+          const radius=isFirst?'8px 0 0 8px':isLast?'0 8px 8px 0':'0';
+          const showLabel=t.min>3;
+          return '<div style="flex:'+t.min+' 0 0%;background:'+bg+';display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:4px 4px;border-radius:'+radius+';'+(isLast?'':'border-right:2px solid rgba(255,255,255,0.5);')+'"><span style="font-size:12px;font-weight:700;color:#fff;white-space:nowrap;">'+t.min+'분</span>'+(showLabel?'<span style="font-size:11px;color:#fff;white-space:nowrap;">'+t.label+'</span>':'')+'</div>';
+        }).join('')}
+      </div>
+      <div style="display:flex;width:100%;margin-top:4px;">
+        ${sess.timeline.map(t=>'<div style="flex:'+t.min+' 0 0%;text-align:center;font-size:10px;font-weight:600;color:rgba(255,255,255,0.4);">'+t.min+'분</div>').join('')}
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;">
+        <div style="display:flex;gap:10px;font-size:10px;color:rgba(255,255,255,0.4);"><span style="display:flex;align-items:center;gap:3px;"><span style="width:8px;height:8px;border-radius:2px;background:var(--teal);display:inline-block;"></span>선생님</span><span style="display:flex;align-items:center;gap:3px;"><span style="width:8px;height:8px;border-radius:2px;background:var(--coral);display:inline-block;"></span>아이들</span></div>
+        <span style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.4);">총 40분</span>
+      </div>
+    </div>`;
+
   // Teacher guide data for sessions 6-10
   const TEACHER_GUIDES = {
     6: {
@@ -841,6 +864,7 @@ SESSIONS.forEach((sess, idx) => {
 
   const demoPanel = sess.demoType && !isEthics ? `
     <div class="session-demo-panel">
+      ${timelineBar}
       <div class="demo-box" id="demoBox-${sess.num}">
         <div class="demo-placeholder" id="demoPlaceholder-${sess.num}">
           <span class="demo-icon">${{hands:'🖐️',face:'😊',pose:'🧍',yolo:'👁️'}[sess.demoType]}</span>
@@ -861,7 +885,9 @@ SESSIONS.forEach((sess, idx) => {
         </button>
       </div>
     </div>` : isEthics ? `
-    <div class="session-demo-panel" style="padding:16px;gap:10px;overflow-y:auto;">
+    <div class="session-demo-panel" style="padding:0;gap:0;overflow-y:auto;">
+      ${timelineBar}
+      <div style="padding:16px;display:flex;flex-direction:column;gap:10px;">
       <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--purple);margin-bottom:4px;">AI 딜레마 카드 — 클릭해서 펼치기</div>
       ${[
         {icon:'🚗',title:'자율주행 딜레마',desc:'브레이크 고장 난 테슬라, AI는 누구를 살려야 하나?',detail:'직진 = 보행자 5명 사망 &nbsp;/&nbsp; 핸들 = 탑승자 1명 사망',question:'이 선택의 책임은 누가 지나요?'},
@@ -1019,11 +1045,15 @@ SESSIONS.forEach((sess, idx) => {
           <div style="font-size:12px;color:rgba(255,255,255,0.45);line-height:1.5;">이 양식을 인쇄해서 팀별로 나눠주세요 — 준비 5분이면 끝!</div>
         </div>
       </div>` : ''}
+      </div>
     </div>` : `
-    <div class="session-demo-panel" style="justify-content:center;align-items:center;">
-      <div style="text-align:center;padding:20px;">
-        <div style="font-size:48px;margin-bottom:16px;">✍️</div>
-        <p style="font-size:13px;color:rgba(255,255,255,0.4);line-height:1.6;">체험 대신 토론과 창작으로 진행되는 핵심 차시</p>
+    <div class="session-demo-panel" style="justify-content:flex-start;align-items:stretch;padding:0;">
+      ${timelineBar}
+      <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:20px;">
+        <div style="text-align:center;">
+          <div style="font-size:48px;margin-bottom:16px;">✍️</div>
+          <p style="font-size:13px;color:rgba(255,255,255,0.4);line-height:1.6;">체험 대신 토론과 창작으로 진행되는 핵심 차시</p>
+        </div>
       </div>
     </div>`;
 
@@ -1045,21 +1075,6 @@ SESSIONS.forEach((sess, idx) => {
     <div class="session-body">
       <div class="session-flow">
         <div class="flow-title">수업 흐름 (40분)</div>
-        <div style="display:flex;align-items:stretch;width:100%;height:48px;border-radius:8px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,0.1);">
-          ${sess.timeline.map((t,i,a)=>{
-            const pct=(t.min/40*100).toFixed(1);
-            const bg=t.who==='teacher'?'var(--teal)':'var(--coral)';
-            const isFirst=i===0;
-            const isLast=i===a.length-1;
-            const radius=isFirst?'8px 0 0 8px':isLast?'0 8px 8px 0':'0';
-            const showLabel=t.min>3;
-            return `<div style="flex:${pct} 0 0;background:${bg};display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:4px 6px;border-radius:${radius};${!isLast?'border-right:2px solid rgba(255,255,255,0.5);':''}"><span style="font-size:12px;font-weight:700;color:#fff;white-space:nowrap;">${t.min}분</span>${showLabel?`<span style="font-size:11px;color:#fff;white-space:nowrap;">${t.label}</span>`:''}</div>`;
-          }).join('')}
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;margin:-8px 0 8px;padding:0 2px;">
-          <div style="display:flex;gap:12px;font-size:10px;color:rgba(255,255,255,0.5);"><span>🟩 선생님</span><span>🟧 아이들</span></div>
-          <span style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.5);">총 40분</span>
-        </div>
         <div class="flow-rows">${flowRows}</div>
       </div>
       ${demoPanel}
