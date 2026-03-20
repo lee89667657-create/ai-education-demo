@@ -391,9 +391,9 @@ footer p { font-size:12px; color:rgba(255,255,255,0.3); }
         <em>스스로 판단하는</em><br>
         사람을 키웁니다
       </h1>
-      <p class="hero-sub">중학생을 위한 AI 바르게 쓰기 10차시 프로그램<br>MediaPipe · YOLO 기반 실시간 체험 + 윤리 선언 + 포트폴리오</p>
+      <p class="hero-sub">웹캠 하나로 시작하는 AI 체험 수업<br>코딩 없이 몸으로 느끼고, 스스로 판단하고, 직접 만드는 10차시</p>
       <div class="hero-pillars">
-        <div class="pillar"><div class="pillar-dot" style="background:var(--coral)"></div><span>체험 중심 — MediaPipe · YOLO</span></div>
+        <div class="pillar"><div class="pillar-dot" style="background:var(--coral)"></div><span>체험 중심 — 손·표정·자세·사물 인식 AI</span></div>
         <div class="pillar"><div class="pillar-dot" style="background:var(--purple)"></div><span>나만의 AI 윤리 선언</span></div>
         <div class="pillar"><div class="pillar-dot" style="background:var(--teal)"></div><span>포트폴리오 한 권</span></div>
       </div>
@@ -426,7 +426,7 @@ footer p { font-size:12px; color:rgba(255,255,255,0.3); }
       <tbody>
         <tr><td class="label">AI 체험 방식</td><td>ChatGPT 사용법</td><td>코드로 구현</td><td class="ours">몸으로 직접 체험</td></tr>
         <tr><td class="label">아이 역할</td><td>도구 사용자</td><td>제작자</td><td class="ours">탐험가 · 판단자</td></tr>
-        <tr><td class="label">기술 활용</td><td>텍스트 위주</td><td>프로그래밍</td><td class="ours">MediaPipe · YOLO</td></tr>
+        <tr><td class="label">기술 활용</td><td>텍스트 위주</td><td>프로그래밍</td><td class="ours">손·표정·자세·사물 인식 AI (웹캠 기반)</td></tr>
         <tr><td class="label">윤리 교육</td><td>거의 없음</td><td>없음</td><td class="ours">나만의 윤리 선언문</td></tr>
         <tr><td class="label">결과물</td><td>산출물 빈약</td><td>코드 프로젝트</td><td class="ours">포트폴리오 한 권</td></tr>
         <tr><td class="label">선생님 부담</td><td>준비 많음</td><td>전문 지식 필요</td><td class="ours">QR 하나로 바로 시작</td></tr>
@@ -456,7 +456,7 @@ footer p { font-size:12px; color:rgba(255,255,255,0.3); }
     <div class="portfolio-grid">
       <div class="portfolio-item">
         <div class="portfolio-item-header" style="background:var(--coral)">체험 기록지<br><small style="font-weight:400;opacity:.8">1–4차시</small></div>
-        <div class="portfolio-item-body">핸드트래킹·표정·포즈·YOLO 체험 결과와 아이의 발견을 직접 기록</div>
+        <div class="portfolio-item-body">손·표정·자세·사물 인식 AI 체험 결과와 아이의 발견을 직접 기록</div>
       </div>
       <div class="portfolio-item">
         <div class="portfolio-item-header" style="background:var(--purple)">AI 윤리 선언문<br><small style="font-weight:400;opacity:.8">5차시</small></div>
@@ -515,7 +515,7 @@ footer p { font-size:12px; color:rgba(255,255,255,0.3); }
 </section>
 
 <footer>
-  <p>방과후 AI 바르게 쓰기 프로그램 기획서 · 중학생 대상 10차시 · MediaPipe · YOLO 기반 실시간 체험</p>
+  <p>방과후 AI 바르게 쓰기 프로그램 기획서 · 중학생 대상 10차시 · 손·표정·자세·사물 인식 AI (웹캠 기반) 실시간 체험</p>
 </footer>
 
 <!-- MediaPipe Tasks Vision — 로컬 파일 (CJS) -->
@@ -542,7 +542,7 @@ window.module = { exports: window.exports };
 // ── SESSION DATA ──────────────────────────────────────────────────────────────
 const SESSIONS = [
   {
-    num:1, phase:"체험", phaseClass:"exp", tool:"핸드 트래킹 (MediaPipe)",
+    num:1, phase:"체험", phaseClass:"exp", tool:"손 동작 인식 AI",
     title:"AI야, 내 손 봐봐!",
     goal:"AI가 내 손을 어떻게 읽는지 직접 느끼며 'AI란 무엇인가' 첫 경험",
     flow:[
@@ -559,7 +559,7 @@ const SESSIONS = [
     demoDesc:"손을 카메라에 보여주세요 — 검지로 떠다니는 물건을 잡고, 손을 펴서 던져보세요!",
   },
   {
-    num:2, phase:"체험", phaseClass:"exp", tool:"표정 감지 (MediaPipe Face Mesh)",
+    num:2, phase:"체험", phaseClass:"exp", tool:"표정 인식 AI",
     title:"AI야, 내 표정 맞혀봐!",
     goal:"AI가 감정을 어떻게 판단하는지 체험하며 'AI도 틀릴 수 있다' 첫 인식",
     flow:[
@@ -576,7 +576,7 @@ const SESSIONS = [
     demoDesc:"카메라를 보며 다양한 표정을 지어보세요 — AI가 468개 얼굴 랜드마크를 감지합니다",
   },
   {
-    num:3, phase:"체험", phaseClass:"exp", tool:"포즈 감지 (MediaPipe Pose)",
+    num:3, phase:"체험", phaseClass:"exp", tool:"자세 인식 AI",
     title:"AI야, 내 몸 따라와!",
     goal:"몸 동작으로 AI와 상호작용하며 AI의 작동 원리를 몸으로 체득",
     flow:[
@@ -593,14 +593,14 @@ const SESSIONS = [
     demoDesc:"카메라 앞에서 자유롭게 움직여보세요 — AI가 33개 신체 관절을 실시간으로 추적합니다",
   },
   {
-    num:4, phase:"체험", phaseClass:"exp", tool:"사물 인식 (YOLO)",
+    num:4, phase:"체험", phaseClass:"exp", tool:"사물 인식 AI",
     title:"AI야, 이게 뭔지 알아?",
-    goal:"YOLO로 주변 사물을 인식해보며 AI의 가능성과 한계를 동시에 경험",
+    goal:"사물 인식 AI로 주변 사물을 인식해보며 AI의 가능성과 한계를 동시에 경험",
     flow:[
       {time:"0–5분", who:"teacher", whoLabel:"선생님", act:"QR 띄우기 + 'AI가 교실에서 뭘 찾는지 관찰해봐요'"},
-      {time:"5–20분", who:"student", whoLabel:"아이들", act:"교실 곳곳 YOLO 스캔 — 잘 인식하는 것 vs 못 인식하는 것 찾기"},
+      {time:"5–20분", who:"student", whoLabel:"아이들", act:"교실 곳곳 AI 스캔 — 잘 인식하는 것 vs 못 인식하는 것 찾기"},
       {time:"20–33분", who:"student", whoLabel:"아이들", act:"'AI 오인식 베스트 3' 팀별 수집 대결 — 웃긴 사례 공유"},
-      {time:"33–40분", who:"teacher", whoLabel:"선생님", act:"'YOLO를 어디에 쓰면 좋을까?' — 분리수거·보안·쇼핑 연결"},
+      {time:"33–40분", who:"teacher", whoLabel:"선생님", act:"'사물 인식 AI를 어디에 쓰면 좋을까?' — 분리수거·보안·쇼핑 연결"},
     ],
     result:"AI 오인식 베스트 컬렉션 (사진 + 코멘트)",
     tip:"웃긴 오인식 사례가 나올수록 수업이 살아나요. 많이 웃게 놔두세요.",
@@ -991,7 +991,7 @@ SESSIONS.forEach((sess, idx) => {
           ${[
             {num:'①',title:'우리가 해결하고 싶은 문제',hint:'예시) 학교 급식 잔반이 너무 많아요'},
             {num:'②',title:'이 문제에 AI를 어떻게 활용할까요?',hint:'예시) 카메라로 잔반량을 인식해서 인기 메뉴를 자동으로 파악'},
-            {num:'③',title:'우리 팀의 AI 활용 아이디어',hint:'예시) YOLO 사물인식으로 잔반 종류 감지 → 메뉴 추천 AI'},
+            {num:'③',title:'우리 팀의 AI 활용 아이디어',hint:'예시) 사물 인식 AI로 잔반 종류 감지 → 메뉴 추천 AI'},
             {num:'④',title:'예상 결과물 (무엇을 만들건지)',hint:'예시) 잔반 줄이기 캠페인 포스터 + 아이디어 발표 자료'},
           ].map(f=>`
           <div style="margin-bottom:14px;">
