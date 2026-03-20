@@ -1045,14 +1045,20 @@ SESSIONS.forEach((sess, idx) => {
     <div class="session-body">
       <div class="session-flow">
         <div class="flow-title">수업 흐름 (40분)</div>
-        <div style="display:flex;align-items:stretch;width:100%;height:54px;border-radius:8px;overflow:hidden;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,0.1);position:relative;">
-          ${sess.timeline.map(t=>{
+        <div style="display:flex;align-items:stretch;width:100%;height:48px;border-radius:8px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,0.1);">
+          ${sess.timeline.map((t,i,a)=>{
             const pct=(t.min/40*100).toFixed(1);
-            const bg=t.who==='teacher'?'#0a7b6b':'#E8613A';
-            const bgLight=t.who==='teacher'?'rgba(10,123,107,0.12)':'rgba(232,97,58,0.12)';
-            return `<div style="flex:0 0 ${pct}%;background:${bg};display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:2px 4px;min-width:0;border-right:1px solid rgba(255,255,255,0.3);"><span style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.85);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;">${t.min}분</span><span style="font-size:10.5px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;">${t.label}</span><span style="font-size:9px;color:rgba(255,255,255,0.7);white-space:nowrap;">${t.who==='teacher'?'👩‍🏫':'👦'}</span></div>`;
+            const bg=t.who==='teacher'?'var(--teal)':'var(--coral)';
+            const isFirst=i===0;
+            const isLast=i===a.length-1;
+            const radius=isFirst?'8px 0 0 8px':isLast?'0 8px 8px 0':'0';
+            const showLabel=t.min>3;
+            return `<div style="flex:${pct} 0 0;background:${bg};display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:4px 6px;border-radius:${radius};${!isLast?'border-right:2px solid rgba(255,255,255,0.5);':''}"><span style="font-size:12px;font-weight:700;color:#fff;white-space:nowrap;">${t.min}분</span>${showLabel?`<span style="font-size:11px;color:#fff;white-space:nowrap;">${t.label}</span>`:''}</div>`;
           }).join('')}
-          <div style="position:absolute;right:6px;top:2px;font-size:9px;font-weight:700;color:rgba(255,255,255,0.6);letter-spacing:0.5px;">총 40분</div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin:-8px 0 8px;padding:0 2px;">
+          <div style="display:flex;gap:12px;font-size:10px;color:rgba(255,255,255,0.5);"><span>🟩 선생님</span><span>🟧 아이들</span></div>
+          <span style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.5);">총 40분</span>
         </div>
         <div class="flow-rows">${flowRows}</div>
       </div>
