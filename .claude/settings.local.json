@@ -14,7 +14,21 @@
       "Bash(git -C C:/aiproject add .)",
       "Bash(git -C:*)",
       "Bash(git -C C:/aiproject push)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(python:*)",
+      "Bash(find /mnt/ -name \"1773965801915_image.png\")",
+      "Read(//c/tmp/**)",
+      "Read(//c/Users/lee89//**)",
+      "Bash(pip install:*)",
+      "Bash(python3:*)",
+      "Bash(soffice:*)",
+      "Read(//c/Program Files/LibreOffice/program/**)",
+      "Read(//c/Program Files \\(x86\\)/LibreOffice/program/**)",
+      "Bash(taskkill //F //IM WINWORD.EXE)",
+      "Bash(kill %1)",
+      "Bash(\"AI교육_제안서_데모.html\")",
+      "Bash(npm install:*)",
+      "Bash(vercel:*)"
     ]
   }
 }

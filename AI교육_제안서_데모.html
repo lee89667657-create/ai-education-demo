@@ -556,21 +556,21 @@ window.module = { exports: window.exports };
 const SESSIONS = [
   {
     num:1, phase:"체험", phaseClass:"exp", tool:"손 동작 인식 AI",
-    title:"AI야, 내 손 봐봐!",
+    title:"AI야, 가위바위보 한판!",
     goal:"AI가 내 손을 어떻게 읽는지 직접 느끼며 'AI란 무엇인가' 첫 경험",
     flow:[
-      {time:"0–5분", who:"teacher", whoLabel:"선생님", act:"QR 띄우기 + '오늘 손으로 화면을 움직여볼 거예요' 한마디"},
-      {time:"5–20분", who:"student", whoLabel:"아이들", act:"핸드 트래킹 앱으로 화면 속 물체 움직이기 — 자유 탐험"},
+      {time:"0–5분", who:"teacher", whoLabel:"선생님", act:"QR 띄우기 + '오늘 AI와 가위바위보 대결해볼 거예요' 한마디"},
+      {time:"5–20분", who:"student", whoLabel:"아이들", act:"가위바위보 배틀 게임 — AI 이기기 도전"},
       {time:"20–30분", who:"student", whoLabel:"아이들", act:"'AI가 내 손을 어떻게 읽을까?' 짝과 대화 → 포스트잇에 발견 적기"},
-      {time:"30–40분", who:"teacher", whoLabel:"선생님", act:"발견 공유 + '이 기술 어디에 쓰면 좋을까?' 질문으로 마무리"},
+      {time:"30–40분", who:"teacher", whoLabel:"선생님", act:"발견 공유 + 'AI를 이기려면 뭘 알아야 할까?' 질문으로 마무리"},
     ],
     result:"체험 기록지 1장 — 내가 발견한 것·신기했던 점",
-    tip:"QR 하나만 띄우면 준비 끝. 아이들이 알아서 탐험해요.",
-    teacherRole:["QR 화면 띄우기","\u201C손으로 화면을 조작해보세요\u201D 안내","탐색 중인 학생 순회 관찰"],
-    timeline:[{who:"teacher",min:5,label:"시작 안내"},{who:"student",min:15,label:"자유 탐험"},{who:"student",min:10,label:"짝 토론"},{who:"teacher",min:10,label:"공유·마무리"}],
+    tip:"QR 하나만 띄우면 준비 끝. 아이들이 알아서 대결해요.",
+    teacherRole:["QR 화면 띄우기","\u201CAI와 가위바위보 해보세요\u201D 안내","탐색 중인 학생 순회 관찰"],
+    timeline:[{who:"teacher",min:5,label:"시작 안내"},{who:"student",min:15,label:"가위바위보 배틀"},{who:"student",min:10,label:"짝 토론"},{who:"teacher",min:10,label:"공유·마무리"}],
     portfolio:"체험 기록지 → 포트폴리오 1번 페이지",
     demoType:"hands",
-    demoDesc:"손을 카메라에 보여주세요 — 검지로 떠다니는 물건을 잡고, 손을 펴서 던져보세요!",
+    demoDesc:"손을 카메라에 보여주세요 — 가위✌️ 바위✊ 보🖐️로 AI와 대결!",
   },
   {
     num:2, phase:"체험", phaseClass:"exp", tool:"표정 인식 AI",
@@ -1241,177 +1241,76 @@ async function runHands(num, el) {
       loadedModels['hands'] = await HandLandmarker.createFromOptions(
         await FilesetResolver.forVisionTasks(WASM_PATH), {
           baseOptions: { modelAssetPath:'models/hand_landmarker.task', delegate:'GPU' },
-          runningMode:'VIDEO', numHands:2,
+          runningMode:'VIDEO', numHands:1,
         });
     }
   } catch(e) { el.info.textContent='❌ 모델 로드 실패: '+e.message; return; }
 
   const landmarker = loadedModels['hands'];
   el.info.textContent = '✋ 손을 카메라에 보여주세요!';
-  if (el.result) { el.result.style.display='flex'; el.result.innerHTML='🧺 검지로 물건을 잡아 바구니에 넣으세요! 30초 도전!'; }
+  if (el.result) { el.result.style.display='flex'; el.result.innerHTML='✊✌️🖐️ 가위바위보로 AI와 대결! 30초 도전!'; }
   activeLoops[num] = true;
   const W=1280, H=720;
   el.canvas.width=W; el.canvas.height=H;
   const ctx = el.canvas.getContext('2d');
   let lastTime=-1;
 
-  // ── 바구니 ──
-  const basket = { x: W-120, y: H/2+20, w: 180, h: 180 };
-  let basketShake = 0;       // 흔들림 강도 (점수 시 감소)
-  let basketShakeT = 0;      // 흔들림 시작 시간
-  let sparkles = [];         // ✨ 반짝이 파티클
+  // ── 제스처 인식 ──
+  const GESTURES = ['바위','가위','보'];
+  const GESTURE_EMOJI = {바위:'✊', 가위:'✌️', 보:'🖐️'};
+  const GESTURE_EN = {바위:'ROCK', 가위:'SCISSORS', 보:'PAPER'};
 
-  // SVG 스타일 바구니 그리기
-  function drawBasket(cx, cy, w, h, shakeAngle) {
-    ctx.save();
-    ctx.translate(cx, cy);
-    ctx.rotate(shakeAngle);
-
-    const hw=w/2, hh=h/2;
-    const topW=hw*1.1, botW=hw*0.55;
-    const bodyTop=-hh*0.15, bodyBot=hh*0.85;
-    const rimH=16;
-
-    // 그림자
-    ctx.fillStyle='rgba(0,0,0,0.18)';
-    ctx.beginPath();
-    ctx.ellipse(0, bodyBot+14, botW+10, 10, 0, 0, Math.PI*2);
-    ctx.fill();
-
-    // 손잡이 (반원)
-    ctx.strokeStyle='#8B5E3C'; ctx.lineWidth=7; ctx.lineCap='round';
-    ctx.beginPath();
-    ctx.arc(0, bodyTop-rimH, hw*0.5, Math.PI, 0);
-    ctx.stroke();
-    ctx.strokeStyle='#A0714B'; ctx.lineWidth=4;
-    ctx.beginPath();
-    ctx.arc(0, bodyTop-rimH, hw*0.5, Math.PI, 0);
-    ctx.stroke();
-
-    // 바구니 몸통 (사다리꼴)
-    ctx.beginPath();
-    ctx.moveTo(-topW, bodyTop);
-    ctx.lineTo(topW, bodyTop);
-    ctx.lineTo(botW, bodyBot);
-    ctx.lineTo(-botW, bodyBot);
-    ctx.closePath();
-    // 갈색 그라데이션
-    const bodyGrad = ctx.createLinearGradient(0, bodyTop, 0, bodyBot);
-    bodyGrad.addColorStop(0, '#C4913A');
-    bodyGrad.addColorStop(0.5, '#A0714B');
-    bodyGrad.addColorStop(1, '#7A5230');
-    ctx.fillStyle = bodyGrad;
-    ctx.fill();
-    ctx.strokeStyle='#6B4226'; ctx.lineWidth=3; ctx.stroke();
-
-    // 격자 패턴 — 가로줄
-    ctx.strokeStyle='rgba(107,66,38,0.5)'; ctx.lineWidth=2;
-    for (let i=1; i<5; i++) {
-      const t=i/5;
-      const y=bodyTop+(bodyBot-bodyTop)*t;
-      const lx=topW+(botW-topW)*t;
-      ctx.beginPath(); ctx.moveTo(-lx, y); ctx.lineTo(lx, y); ctx.stroke();
-    }
-    // 격자 패턴 — 세로 대각선 (엮은 느낌)
-    ctx.strokeStyle='rgba(107,66,38,0.35)'; ctx.lineWidth=1.5;
-    for (let i=-3; i<=3; i++) {
-      const xOff = i * (topW/3);
-      ctx.beginPath();
-      ctx.moveTo(xOff, bodyTop);
-      ctx.lineTo(xOff*botW/topW+8, bodyBot);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(xOff, bodyTop);
-      ctx.lineTo(xOff*botW/topW-8, bodyBot);
-      ctx.stroke();
-    }
-
-    // 테두리 림 (두꺼운 상단)
-    ctx.beginPath();
-    ctx.moveTo(-topW-4, bodyTop-rimH/2);
-    ctx.quadraticCurveTo(-topW-6, bodyTop+rimH*0.3, -topW, bodyTop+rimH*0.5);
-    ctx.lineTo(topW, bodyTop+rimH*0.5);
-    ctx.quadraticCurveTo(topW+6, bodyTop+rimH*0.3, topW+4, bodyTop-rimH/2);
-    ctx.lineTo(-topW-4, bodyTop-rimH/2);
-    ctx.closePath();
-    const rimGrad = ctx.createLinearGradient(0, bodyTop-rimH, 0, bodyTop+rimH);
-    rimGrad.addColorStop(0, '#D4A043');
-    rimGrad.addColorStop(1, '#8B5E3C');
-    ctx.fillStyle = rimGrad; ctx.fill();
-    ctx.strokeStyle='#6B4226'; ctx.lineWidth=2; ctx.stroke();
-
-    // 하이라이트
-    ctx.fillStyle='rgba(255,255,255,0.12)';
-    ctx.beginPath();
-    ctx.moveTo(-topW*0.7, bodyTop+4);
-    ctx.lineTo(-topW*0.1, bodyTop+4);
-    ctx.lineTo(-botW*0.1, bodyBot-8);
-    ctx.lineTo(-botW*0.5, bodyBot-8);
-    ctx.closePath();
-    ctx.fill();
-
-    ctx.restore();
+  // 각 손가락이 펴졌는지 판별 (엄지 제외)
+  function isFingerExtended(mkp, tipIdx, pipIdx) {
+    const w = mkp[0];
+    const dTip = Math.hypot(mkp[tipIdx].x - w.x, mkp[tipIdx].y - w.y);
+    const dPip = Math.hypot(mkp[pipIdx].x - w.x, mkp[pipIdx].y - w.y);
+    return dTip > dPip + 15;
   }
 
-  // ── 떠다니는 물건들 (크게!) ──
-  const EMOJIS = ['🌟','⚽','🎈','❤️','🎵'];
-  const ITEM_SIZE = 80;
-  function spawnItem(em, idx) {
-    return {
-      emoji: em, idx: idx,
-      x: 100 + Math.random()*(W*0.55),
-      y: 120 + Math.random()*(H-280),
-      vx: (Math.random()-0.5)*1.8,
-      vy: (Math.random()-0.5)*1.8,
-      size: ITEM_SIZE,
-      grabbed: false, grabbedBy: -1,
-      flingVx: 0, flingVy: 0,
-      bobPhase: Math.random()*Math.PI*2,
-      alive: true,
-    };
-  }
-  let items = EMOJIS.map((em,i) => spawnItem(em,i));
+  function detectGesture(mkp) {
+    const indexOpen = isFingerExtended(mkp, 8, 6);
+    const middleOpen = isFingerExtended(mkp, 12, 10);
+    const ringOpen = isFingerExtended(mkp, 16, 14);
+    const pinkyOpen = isFingerExtended(mkp, 20, 18);
+    const openCount = [indexOpen, middleOpen, ringOpen, pinkyOpen].filter(Boolean).length;
 
-  const GRAB_DIST = 70;
-  const FLING_FRICTION = 0.97;
+    // 보: 3개 이상 펼침
+    if (openCount >= 3) return '보';
+    // 가위: 검지+중지만 펼침
+    if (indexOpen && middleOpen && !ringOpen && !pinkyOpen) return '가위';
+    // 바위: 1개 이하 펼침
+    if (openCount <= 1) return '바위';
+    return null;
+  }
+
+  // 승패 판정
+  function judge(player, ai) {
+    if (player === ai) return 'draw';
+    if ((player==='가위'&&ai==='보')||(player==='바위'&&ai==='가위')||(player==='보'&&ai==='바위')) return 'win';
+    return 'lose';
+  }
 
   // ── 게임 상태 ──
-  let score = 0;
+  let playerScore = 0, aiScore = 0;
   const GAME_TIME = 30;
   let gameStartTime = performance.now();
   let gameOver = false;
-  let scoreEffects = []; // +1 이펙트 애니메이션
 
-  // 손 열림 감지
-  function isHandOpen(mkp) {
-    let openCount = 0;
-    const pairs = [[8,6],[12,10],[16,14],[20,18]];
-    const w = mkp[0];
-    pairs.forEach(([tip,pip]) => {
-      const dTip = Math.hypot(mkp[tip].x-w.x, mkp[tip].y-w.y);
-      const dPip = Math.hypot(mkp[pip].x-w.x, mkp[pip].y-w.y);
-      if (dTip > dPip + 15) openCount++;
-    });
-    return openCount >= 3;
-  }
+  // 라운드 상태
+  let currentGesture = null;      // 현재 인식 중인 제스처
+  let gestureStableCount = 0;     // 제스처 안정 프레임 수
+  const STABLE_THRESHOLD = 15;    // ~0.5초 @30fps
+  let roundState = 'waiting';     // waiting | countdown | judging | cooldown
+  let countdownStart = 0;
+  let roundResult = null;         // {player, ai, result, time}
+  let aiChoice = null;
+  let resultEffects = [];         // WIN/LOSE 이펙트
+  let roundCooldownEnd = 0;
 
-  // 검지 속도 추적 (관성용)
-  const prevTips = {};  // {hi: [{x,y,t}, ...]} 최근 5프레임
-  function trackTip(hi, x, y, t) {
-    if (!prevTips[hi]) prevTips[hi] = [];
-    prevTips[hi].push({x,y,t});
-    if (prevTips[hi].length > 6) prevTips[hi].shift();
-  }
-  function getTipVelocity(hi) {
-    const pts = prevTips[hi];
-    if (!pts || pts.length < 2) return {vx:0, vy:0, speed:0};
-    const a = pts[0], b = pts[pts.length-1];
-    const dt = (b.t - a.t) / 16.67; // 프레임 단위
-    if (dt < 0.5) return {vx:0, vy:0, speed:0};
-    const vx = (b.x - a.x) / dt;
-    const vy = (b.y - a.y) / dt;
-    return {vx, vy, speed: Math.hypot(vx, vy)};
-  }
+  // 카운트다운 설정
+  const COUNTDOWN_MS = 1500;      // 3-2-1 카운트다운
+  const RESULT_DISPLAY_MS = 1500; // 결과 표시 시간
 
   const loop = () => {
     if (!activeLoops[num]||!activeStreams[num]) return;
@@ -1426,218 +1325,260 @@ async function runHands(num, el) {
     ctx.save(); ctx.translate(W,0); ctx.scale(-1,1);
     ctx.drawImage(el.video,0,0,W,H); ctx.restore();
 
-    // ── 바구니 그리기 ──
-    const bx=basket.x, by=basket.y, bw=basket.w, bh=basket.h;
-    // 흔들림 계산
-    let shakeAngle = 0;
-    if (basketShake > 0) {
-      const shakeAge = (now - basketShakeT) / 500;
-      basketShake = Math.max(0, 1 - shakeAge);
-      shakeAngle = Math.sin(now * 0.03) * basketShake * 0.15;
-    }
-    // 히트존 시각적 표시 (연한 원)
-    ctx.beginPath(); ctx.arc(bx, by, bw*0.55, 0, Math.PI*2);
-    ctx.fillStyle='rgba(74,222,128,0.06)'; ctx.fill();
-    // SVG 바구니
-    drawBasket(bx, by, bw, bh, shakeAngle);
-    // 라벨
-    ctx.font='bold 16px sans-serif'; ctx.fillStyle='rgba(74,222,128,0.8)';
-    ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.fillText('여기에 넣기!', bx, by+bh/2+28);
+    // 살짝 어둡게 (UI 가독성)
+    ctx.fillStyle='rgba(0,0,0,0.15)'; ctx.fillRect(0,0,W,H);
 
-    // ── 반짝이 파티클 ✨ ──
-    sparkles = sparkles.filter(sp => now - sp.t < 800);
-    sparkles.forEach(sp => {
-      const age = (now - sp.t) / 800;
-      const sz = (1 - age) * sp.size;
-      ctx.globalAlpha = 1 - age;
-      ctx.font = `${sz}px serif`;
-      ctx.textAlign='center'; ctx.textBaseline='middle';
-      ctx.fillText('✨', sp.x + sp.dx * age, sp.y + sp.dy * age - age*30);
-      ctx.globalAlpha = 1;
-    });
+    let detectedGesture = null;
 
     if (!gameOver) {
-      // ── 물건 물리 업데이트 ──
-      items.forEach(it => {
-        if (!it.alive || it.grabbed) return;
-        if (Math.abs(it.flingVx)>0.5 || Math.abs(it.flingVy)>0.5) {
-          it.x += it.flingVx;
-          it.y += it.flingVy;
-          it.flingVx *= FLING_FRICTION;
-          it.flingVy *= FLING_FRICTION;
-        } else {
-          it.bobPhase += 0.02;
-          it.x += it.vx + Math.sin(it.bobPhase)*0.5;
-          it.y += it.vy + Math.cos(it.bobPhase*0.7)*0.4;
-          it.flingVx = 0; it.flingVy = 0;
-        }
-        // 벽 바운스 (바구니 영역 제외)
-        const pad = it.size*0.5;
-        if (it.x < pad) { it.x=pad; it.vx=Math.abs(it.vx); it.flingVx=Math.abs(it.flingVx)*0.7; }
-        if (it.x > W-pad) { it.x=W-pad; it.vx=-Math.abs(it.vx); it.flingVx=-Math.abs(it.flingVx)*0.7; }
-        if (it.y < pad) { it.y=pad; it.vy=Math.abs(it.vy); it.flingVy=Math.abs(it.flingVy)*0.7; }
-        if (it.y > H-pad) { it.y=H-pad; it.vy=-Math.abs(it.vy); it.flingVy=-Math.abs(it.flingVy)*0.7; }
-
-        // 바구니 충돌 판정 (원형 히트존)
-        if (Math.hypot(it.x - bx, it.y - by) < bw*0.55) {
-          it.alive = false;
-          score++;
-          scoreEffects.push({x:bx, y:by-bh/2-10, t:now, text:'+1'});
-          // 바구니 흔들림
-          basketShake = 1; basketShakeT = now;
-          // 반짝이 파티클 8개
-          for (let si=0; si<8; si++) {
-            const ang = Math.random()*Math.PI*2;
-            sparkles.push({
-              x: bx, y: by - 20,
-              dx: Math.cos(ang)*(60+Math.random()*40),
-              dy: Math.sin(ang)*(60+Math.random()*40),
-              size: 20+Math.random()*20, t: now,
-            });
-          }
-          // 리스폰: 1초 후 새 아이콘
-          setTimeout(()=>{
-            const idx = items.indexOf(it);
-            if (idx>=0 && !gameOver) items[idx] = spawnItem(EMOJIS[Math.floor(Math.random()*EMOJIS.length)], idx);
-          }, 1000);
-        }
-      });
-
-      // ── 손 인식 + 인터랙션 ──
+      // ── 손 인식 ──
       if (now!==lastTime) {
         lastTime=now;
         try {
           const result=landmarker.detectForVideo(el.video,now);
-          const activeHands = new Set();
-          if (result&&result.landmarks) {
-            result.landmarks.forEach((lm,hi)=>{
-              activeHands.add(hi);
-              const mkp=lm.map(p=>({x:(1-p.x)*W, y:p.y*H}));
-              const tip8 = mkp[8];
-              const open = isHandOpen(mkp);
+          if (result&&result.landmarks&&result.landmarks.length>0) {
+            const lm = result.landmarks[0];
+            const mkp=lm.map(p=>({x:(1-p.x)*W, y:p.y*H}));
 
-              trackTip(hi, tip8.x, tip8.y, now);
-              const vel = getTipVelocity(hi);
-
-              // 잡고 있는 물건 — 손 펴면 관성으로 날리기
-              items.forEach(it => {
-                if (!it.alive || !it.grabbed || it.grabbedBy !== hi) return;
-                if (open && vel.speed > 5) {
-                  it.grabbed = false; it.grabbedBy = -1;
-                  it.flingVx = vel.vx * 3;
-                  it.flingVy = vel.vy * 3;
-                } else {
-                  it.x = tip8.x; it.y = tip8.y;
-                  it.flingVx = 0; it.flingVy = 0;
-                }
-              });
-
-              // 잡기 시도
-              if (!open) {
-                items.forEach(it => {
-                  if (!it.alive || it.grabbed) return;
-                  if (Math.hypot(it.x-tip8.x, it.y-tip8.y) < GRAB_DIST) {
-                    it.grabbed = true; it.grabbedBy = hi;
-                    it.flingVx = 0; it.flingVy = 0;
-                  }
-                });
-              }
-
-              // ── 관절 그리기 ──
-              ctx.strokeStyle='rgba(13,158,138,0.9)'; ctx.lineWidth=4;
-              HAND_CONNECTIONS.forEach(([a,b])=>{
-                ctx.beginPath(); ctx.moveTo(mkp[a].x,mkp[a].y);
-                ctx.lineTo(mkp[b].x,mkp[b].y); ctx.stroke();
-              });
-              mkp.forEach((p,i)=>{
-                const isTip=[4,8,12,16,20].includes(i);
-                ctx.beginPath(); ctx.arc(p.x,p.y,isTip?12:7,0,Math.PI*2);
-                ctx.fillStyle=isTip?'#E8613A':'#0D9E8A'; ctx.fill();
-              });
-              // 검지 범위
-              ctx.beginPath(); ctx.arc(tip8.x,tip8.y,GRAB_DIST,0,Math.PI*2);
-              ctx.strokeStyle='rgba(232,97,58,0.2)'; ctx.lineWidth=2; ctx.stroke();
-              // 손 이름
-              const wrist=mkp[0];
-              const hLabel = wrist.x < W/2 ? '왼손' : '오른손';
-              ctx.fillStyle='rgba(0,0,0,0.8)'; ctx.fillRect(wrist.x-52,wrist.y-40,104,32);
-              ctx.fillStyle='#C8EDE6'; ctx.font='bold 20px sans-serif'; ctx.textAlign='center';
-              ctx.fillText(hLabel, wrist.x, wrist.y-18);
+            // ── 관절 그리기 + 랜드마크 번호 ──
+            ctx.strokeStyle='rgba(13,158,138,0.7)'; ctx.lineWidth=3;
+            HAND_CONNECTIONS.forEach(([a,b])=>{
+              ctx.beginPath(); ctx.moveTo(mkp[a].x,mkp[a].y);
+              ctx.lineTo(mkp[b].x,mkp[b].y); ctx.stroke();
             });
+            mkp.forEach((p,i)=>{
+              const isTip=[4,8,12,16,20].includes(i);
+              ctx.beginPath(); ctx.arc(p.x,p.y,isTip?10:6,0,Math.PI*2);
+              ctx.fillStyle=isTip?'#E8613A':'#0D9E8A'; ctx.fill();
+              // 랜드마크 번호 표시 (원리 이해용)
+              ctx.font='bold 11px monospace'; ctx.fillStyle='rgba(255,255,200,0.85)';
+              ctx.textAlign='left'; ctx.textBaseline='bottom';
+              ctx.fillText(String(i), p.x+8, p.y-4);
+            });
+
+            detectedGesture = detectGesture(mkp);
+
+            // 제스처 안정성 체크
+            if (detectedGesture && detectedGesture === currentGesture) {
+              gestureStableCount++;
+            } else {
+              currentGesture = detectedGesture;
+              gestureStableCount = detectedGesture ? 1 : 0;
+            }
+
+            // 현재 인식된 제스처 표시 (화면 왼쪽 하단)
+            if (detectedGesture) {
+              const gx = 180, gy = H - 120;
+              // 안정도 바
+              const stableRatio = Math.min(1, gestureStableCount / STABLE_THRESHOLD);
+              ctx.fillStyle='rgba(0,0,0,0.7)';
+              ctx.beginPath();
+              ctx.roundRect(gx-140, gy-60, 280, 120, 16);
+              ctx.fill();
+              // 이모지
+              ctx.font='64px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+              ctx.fillText(GESTURE_EMOJI[detectedGesture], gx-60, gy);
+              // 텍스트
+              ctx.font='bold 36px sans-serif'; ctx.fillStyle='#fff';
+              ctx.textAlign='left';
+              ctx.fillText(detectedGesture, gx, gy-10);
+              // 안정도 게이지
+              ctx.fillStyle='rgba(255,255,255,0.2)';
+              ctx.fillRect(gx, gy+16, 100, 12);
+              const barColor = stableRatio >= 1 ? '#4ade80' : '#fbbf24';
+              ctx.fillStyle=barColor;
+              ctx.fillRect(gx, gy+16, 100*stableRatio, 12);
+              if (roundState === 'waiting') {
+                ctx.font='12px sans-serif'; ctx.fillStyle='rgba(255,255,255,0.6)';
+                ctx.textAlign='left';
+                ctx.fillText(stableRatio>=1?'제출 준비 완료!':'손 유지하세요...', gx, gy+46);
+              }
+            }
+          } else {
+            currentGesture = null;
+            gestureStableCount = 0;
           }
-          // 손 사라지면 잡기 해제
-          items.forEach(it => {
-            if (it.grabbed && !activeHands.has(it.grabbedBy)) { it.grabbed=false; it.grabbedBy=-1; }
-          });
         } catch(e){}
+      }
+
+      // ── 라운드 상태 머신 ──
+      if (roundState === 'waiting') {
+        if (gestureStableCount >= STABLE_THRESHOLD && currentGesture) {
+          roundState = 'countdown';
+          countdownStart = now;
+          aiChoice = GESTURES[Math.floor(Math.random()*3)];
+        }
+      } else if (roundState === 'countdown') {
+        const cdElapsed = now - countdownStart;
+        const cdNum = 3 - Math.floor(cdElapsed / 500);
+        // 카운트다운 표시
+        if (cdNum > 0) {
+          ctx.font='bold 120px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+          ctx.fillStyle='rgba(255,255,255,0.9)';
+          ctx.shadowColor='rgba(0,0,0,0.5)'; ctx.shadowBlur=20;
+          ctx.fillText(String(cdNum), W/2, H/2);
+          ctx.shadowColor='transparent'; ctx.shadowBlur=0;
+        }
+        if (cdElapsed >= COUNTDOWN_MS) {
+          // 판정!
+          const playerChoice = currentGesture || '바위';
+          const res = judge(playerChoice, aiChoice);
+          if (res === 'win') playerScore++;
+          else if (res === 'lose') aiScore++;
+          roundResult = { player: playerChoice, ai: aiChoice, result: res, time: now };
+          roundState = 'judging';
+          // 이펙트
+          if (res === 'win') {
+            for (let i=0; i<12; i++) {
+              const ang = Math.random()*Math.PI*2;
+              resultEffects.push({
+                x: W/2, y: H/2, dx: Math.cos(ang)*(80+Math.random()*60),
+                dy: Math.sin(ang)*(80+Math.random()*60),
+                emoji: ['🎉','⭐','✨','🎊'][Math.floor(Math.random()*4)],
+                size: 24+Math.random()*20, t: now,
+              });
+            }
+          }
+        }
+      } else if (roundState === 'judging') {
+        const judgeElapsed = now - roundResult.time;
+        if (judgeElapsed < RESULT_DISPLAY_MS) {
+          // 결과 표시 (화면 중앙)
+          const r = roundResult;
+          const pulse = 1 + Math.sin(judgeElapsed*0.01)*0.05;
+          ctx.save();
+          // 배경 오버레이
+          const overlayAlpha = Math.min(0.6, judgeElapsed/300);
+          ctx.fillStyle = r.result==='win' ? `rgba(16,185,129,${overlayAlpha})` :
+                          r.result==='lose' ? `rgba(239,68,68,${overlayAlpha})` :
+                          `rgba(251,191,36,${overlayAlpha})`;
+          ctx.fillRect(0, H/2-140, W, 280);
+
+          ctx.textAlign='center'; ctx.textBaseline='middle';
+
+          // 플레이어 제스처
+          ctx.font=`${80*pulse}px serif`;
+          ctx.fillText(GESTURE_EMOJI[r.player], W/2-200, H/2-30);
+          ctx.font='bold 24px sans-serif'; ctx.fillStyle='#fff';
+          ctx.fillText('나', W/2-200, H/2+40);
+
+          // VS
+          ctx.font='bold 48px sans-serif'; ctx.fillStyle='#fff';
+          ctx.fillText('VS', W/2, H/2-30);
+
+          // AI 제스처
+          ctx.font=`${80*pulse}px serif`;
+          ctx.fillText(GESTURE_EMOJI[r.ai], W/2+200, H/2-30);
+          ctx.font='bold 24px sans-serif'; ctx.fillStyle='#fff';
+          ctx.fillText('AI', W/2+200, H/2+40);
+
+          // 결과 텍스트
+          const resultText = r.result==='win' ? '승리!' : r.result==='lose' ? '패배...' : '무승부';
+          const resultColor = r.result==='win' ? '#4ade80' : r.result==='lose' ? '#f87171' : '#fbbf24';
+          ctx.font=`bold ${64*pulse}px sans-serif`; ctx.fillStyle=resultColor;
+          ctx.shadowColor='rgba(0,0,0,0.5)'; ctx.shadowBlur=10;
+          ctx.fillText(resultText, W/2, H/2+100);
+          ctx.shadowColor='transparent'; ctx.shadowBlur=0;
+
+          ctx.restore();
+        } else {
+          roundState = 'cooldown';
+          roundCooldownEnd = now + 500;
+          roundResult = null;
+          currentGesture = null;
+          gestureStableCount = 0;
+        }
+      } else if (roundState === 'cooldown') {
+        if (now >= roundCooldownEnd) {
+          roundState = 'waiting';
+        } else {
+          ctx.font='bold 36px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+          ctx.fillStyle='rgba(255,255,255,0.6)';
+          ctx.fillText('다음 라운드 준비...', W/2, H/2);
+        }
       }
     } // end !gameOver
 
-    // ── 물건 그리기 ──
-    items.forEach(it => {
-      if (!it.alive) return;
-      const sz = it.grabbed ? it.size+16 : it.size;
-      ctx.font = `${sz}px serif`;
+    // ── 이펙트 파티클 ──
+    resultEffects = resultEffects.filter(e => now - e.t < 1000);
+    resultEffects.forEach(e => {
+      const age = (now - e.t) / 1000;
+      ctx.globalAlpha = 1 - age;
+      ctx.font = `${e.size*(1-age*0.5)}px serif`;
       ctx.textAlign='center'; ctx.textBaseline='middle';
-      if (it.grabbed) { ctx.shadowColor='#E8613A'; ctx.shadowBlur=28; }
-      ctx.fillText(it.emoji, it.x, it.y);
-      ctx.shadowColor='transparent'; ctx.shadowBlur=0;
-      // 잔상
-      if (!it.grabbed && (Math.abs(it.flingVx)>4||Math.abs(it.flingVy)>4)) {
-        ctx.globalAlpha=0.25;
-        ctx.fillText(it.emoji, it.x-it.flingVx*2, it.y-it.flingVy*2);
-        ctx.globalAlpha=1;
-      }
+      ctx.fillText(e.emoji, e.x + e.dx*age, e.y + e.dy*age - age*40);
+      ctx.globalAlpha = 1;
     });
 
-    // ── +1 이펙트 ──
-    scoreEffects = scoreEffects.filter(e => now-e.t < 1200);
-    scoreEffects.forEach(e => {
-      const age = (now-e.t)/1200;
-      ctx.globalAlpha = 1-age;
-      ctx.font='bold 48px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
-      ctx.fillStyle='#4ade80';
-      ctx.fillText(e.text, e.x, e.y - age*60);
-      ctx.globalAlpha=1;
-    });
+    // ── 상단 HUD: 점수판 + 타이머 ──
+    // 배경
+    ctx.fillStyle='rgba(0,0,0,0.85)'; ctx.fillRect(0,0,W,72);
 
-    // ── 상단 HUD: 점수 + 타이머 ──
-    ctx.fillStyle='rgba(0,0,0,0.8)'; ctx.fillRect(0,0,W,64);
-    // 점수 (왼쪽)
-    ctx.font='bold 32px sans-serif'; ctx.textAlign='left'; ctx.textBaseline='middle';
+    // 플레이어 점수 (왼쪽)
+    ctx.font='bold 28px sans-serif'; ctx.textAlign='left'; ctx.textBaseline='middle';
     ctx.fillStyle='#4ade80';
-    ctx.fillText(`🧺 ${score}점`, 24, 32);
+    ctx.fillText(`🧑 나  ${playerScore}`, 24, 28);
+
+    // AI 점수 (왼쪽, 플레이어 옆)
+    ctx.fillStyle='#f87171';
+    ctx.fillText(`🤖 AI  ${aiScore}`, 220, 28);
+
+    // 가운데: 점수 대결 표시
+    ctx.textAlign='center'; ctx.font='bold 36px sans-serif';
+    ctx.fillStyle='#fff';
+    ctx.fillText(`${playerScore}  :  ${aiScore}`, W/2, 28);
+    ctx.font='14px sans-serif'; ctx.fillStyle='rgba(255,255,255,0.5)';
+    ctx.fillText('플레이어        AI', W/2, 52);
+
     // 타이머 (오른쪽)
     const sec = Math.ceil(remaining);
-    ctx.textAlign='right';
+    ctx.textAlign='right'; ctx.font='bold 32px sans-serif';
     ctx.fillStyle = sec <= 5 ? '#f87171' : '#fbbf24';
-    ctx.fillText(`⏱ ${sec}초`, W-24, 32);
-    // 가운데 안내
-    ctx.textAlign='center'; ctx.fillStyle='rgba(255,255,255,0.6)'; ctx.font='bold 20px sans-serif';
-    ctx.fillText('검지로 잡아서 🧺 바구니에 던지세요!', W/2, 32);
+    ctx.fillText(`⏱ ${sec}초`, W-24, 28);
+
+    // 안내 텍스트
+    ctx.textAlign='right'; ctx.fillStyle='rgba(255,255,255,0.5)'; ctx.font='14px sans-serif';
+    ctx.fillText('가위✌️ 바위✊ 보🖐️를 보여주세요', W-24, 56);
 
     // ── 게임오버 오버레이 ──
     if (gameOver) {
-      ctx.fillStyle='rgba(0,0,0,0.75)'; ctx.fillRect(0,0,W,H);
+      ctx.fillStyle='rgba(0,0,0,0.8)'; ctx.fillRect(0,0,W,H);
       ctx.textAlign='center'; ctx.textBaseline='middle';
-      ctx.font='bold 64px sans-serif'; ctx.fillStyle='#fbbf24';
-      ctx.fillText('⏰ 시간 종료!', W/2, H/2-60);
-      ctx.font='bold 80px sans-serif'; ctx.fillStyle='#4ade80';
-      ctx.fillText(`🧺 ${score}점`, W/2, H/2+40);
-      ctx.font='bold 24px sans-serif'; ctx.fillStyle='rgba(255,255,255,0.5)';
-      ctx.fillText('데모를 다시 시작하려면 [체험 중단] 후 다시 시작하세요', W/2, H/2+110);
 
-      el.info.textContent=`🏆 최종 점수: ${score}점`;
-      if(el.result) el.result.innerHTML=`🏆 <b>최종 점수: ${score}점</b> — 다시 하려면 중단 후 재시작`;
+      ctx.font='bold 56px sans-serif'; ctx.fillStyle='#fbbf24';
+      ctx.fillText('⏰ 시간 종료!', W/2, H/2-120);
+
+      // 최종 점수
+      ctx.font='bold 72px sans-serif';
+      ctx.fillStyle='#4ade80';
+      ctx.fillText(`🧑 ${playerScore}`, W/2-120, H/2);
+      ctx.fillStyle='#fff';
+      ctx.fillText(':', W/2, H/2);
+      ctx.fillStyle='#f87171';
+      ctx.fillText(`${aiScore} 🤖`, W/2+120, H/2);
+
+      // 승패 메시지
+      const finalResult = playerScore > aiScore ? '🎉 축하해요! AI를 이겼어요!' :
+                          playerScore < aiScore ? '😢 AI가 이겼어요... 다시 도전!' :
+                          '🤝 무승부! 좋은 승부였어요!';
+      ctx.font='bold 36px sans-serif';
+      ctx.fillStyle = playerScore > aiScore ? '#4ade80' : playerScore < aiScore ? '#f87171' : '#fbbf24';
+      ctx.fillText(finalResult, W/2, H/2+80);
+
+      // 학습 포인트
+      ctx.font='bold 20px sans-serif'; ctx.fillStyle='rgba(255,255,255,0.7)';
+      ctx.fillText('💡 AI는 손가락 관절(랜드마크) 좌표로 가위/바위/보를 구분해요!', W/2, H/2+140);
+      ctx.font='16px sans-serif'; ctx.fillStyle='rgba(255,255,255,0.4)';
+      ctx.fillText('다시 하려면 [체험 중단] 후 재시작', W/2, H/2+180);
+
+      el.info.textContent=`🏆 최종: 나 ${playerScore} : AI ${aiScore}`;
+      if(el.result) el.result.innerHTML=`🏆 <b>나 ${playerScore} : AI ${aiScore}</b> — ${playerScore>aiScore?'승리!':playerScore<aiScore?'패배':'무승부'} | 다시 하려면 중단 후 재시작`;
     } else {
-      const cnt = items.filter(it=>it.alive).length;
-      const grabbedCnt = items.filter(it=>it.alive&&it.grabbed).length;
-      el.info.textContent=`🧺 ${score}점 | ⏱ ${sec}초`;
-      if(el.result) {
-        if (grabbedCnt > 0) el.result.innerHTML=`🤏 잡는 중! 바구니로 던지세요! &nbsp;|&nbsp; 🧺 <b>${score}점</b> &nbsp;|&nbsp; ⏱ ${sec}초`;
-        else el.result.innerHTML=`검지로 물건을 잡아 🧺 바구니에 넣으세요! &nbsp;|&nbsp; 🧺 <b>${score}점</b> &nbsp;|&nbsp; ⏱ ${sec}초`;
-      }
+      const stateLabel = roundState==='waiting' ? '손 모양을 보여주세요!' :
+                         roundState==='countdown' ? '카운트다운...' :
+                         roundState==='judging' ? '판정 중!' : '준비...';
+      el.info.textContent=`🧑 ${playerScore} : ${aiScore} 🤖 | ⏱ ${sec}초 | ${stateLabel}`;
+      if(el.result) el.result.innerHTML=`✊✌️🖐️ 가위바위보! &nbsp;|&nbsp; 🧑 <b>${playerScore}</b> : <b>${aiScore}</b> 🤖 &nbsp;|&nbsp; ⏱ ${sec}초`;
     }
 
     if(activeLoops[num]) requestAnimationFrame(loop);
